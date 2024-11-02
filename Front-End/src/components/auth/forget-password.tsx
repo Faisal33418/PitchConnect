@@ -5,11 +5,11 @@ import React from 'react';
 
 const ForgetPassword = () => {
 
-  return     (
-    <div>
-        <h2>ForgetPassword</h2>
-    </div>
-        );
+  return  (
+            <div>
+                <h1>ForgetPassword</h1>
+            </div>
+          );
 };
 
 export default ForgetPassword;
