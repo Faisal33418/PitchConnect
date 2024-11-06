@@ -271,4 +271,277 @@ const Entrepreneur = () => {
     setDense(event.target.checked);
   };
 
-  
+  function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
+    const { numSelected } = props;
+    return (
+      <Toolbar
+        sx={[
+          {
+            pl: { sm: 2 },
+            pr: { xs: 1, sm: 1 },
+          },
+          numSelected > 0 && {
+            bgcolor: (theme) =>
+              alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+          },
+        ]}
+      >
+        {numSelected > 0 ? (
+          <Typography
+            sx={{ flex: '1 1 100%' }}
+            color="inherit"
+            variant="subtitle1"
+            component="div"
+          >
+            {numSelected} selected
+          </Typography>
+        ) : (
+          <Typography
+            sx={{ flex: '1 1 100%' }}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+          >
+
+          </Typography>
+        )}
+        {numSelected > 0 ? (
+          <>
+            {/* Active for only admin */}
+            <Tooltip title='Delete'>
+              <IconButton>
+                <DeleteIcon onClick={handleOpen} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Edit">
+              <IconButton>
+                <EditIcon onClick={handleEdit} />
+              </IconButton>
+            </Tooltip>
+          </>
+        ) : (
+          <>
+            <Tooltip title="Filter list">
+              <IconButton>
+                <FilterListIcon />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+        <Tooltip title="Filter list">
+          <RefreshIcon sx={{ color: 'gray', marginRight: '10px' }} className='hover:cursor-pointer' onClick={handleRefresh} />
+        </Tooltip>
+      </Toolbar>
+    );
+  }
+
+  // Avoid a layout jump when reaching the last page with empty rows.
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+  // confimation box handler
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  }
+
+  const DialogBox = () => {
+    return (
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle id="logout-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DeleteForeverIcon color="error" />
+          <Typography variant="h6">Confirm Deletion</Typography>
+        </DialogTitle>
+
+        <DialogContent>
+          <Typography id="delete-dialog-description" variant="body1">
+            Are you sure you want to delete this item? This action is permanent and cannot be undone.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'space-between', padding: 2 }}>
+          <Button onClick={handleClose} variant="outlined" color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} variant="contained" color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const handleEdit = () => {
+    localStorage.setItem('action', 'entrepreneur update');
+    setIsModalOpen(true);
+    const id = localStorage.getItem('actionId');
+    const activeCompany = rows.filter((item) => item._id === id);
+    setActiveCompany(activeCompany[0]);
+  }
+
+  const handleDelete = async () => {
+    if (open) {
+      const token = localStorage.getItem('token');
+      const endPoint = `entrepreneur/remove`, method = 'DELETE', headers = {
+        'Authorization': `Bearer ${token}`
+      }, reqData = null;
+      const actionId = localStorage.getItem('actionId');
+      const apiResponse = await APIs(endPoint, actionId, method, headers, reqData, false);
+      console.log({ apiResponse });
+      if (apiResponse?.status === 200) {
+        toast.success(apiResponse?.data?.message);
+        setTimeout(() => {
+          setOpen(false);
+        }, 1000);
+      }
+    }
+  }
+
+  const handleRefresh = () => {
+    setRefresh(!refresh);
+  }
+
+  React.useEffect(() => {
+    const getActiveUser = () => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      setActiveUser(user);
+      // setActiveCompany(activeCompany[0]);
+    }
+    getActiveUser();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchEntrepreneurs = async () => {
+
+      const token = localStorage.getItem('token');
+      let getUser = localStorage.getItem('user');
+      getUser = JSON.parse(getUser);
+
+      const endPoint = 'entrepreneur', id = null, method = 'GET', headers = {
+        'Authorization': `Bearer ${token}`
+      }, reqData = null;
+
+      const apiResponse = await APIs(endPoint, id, method, headers, reqData, false);
+
+      if (apiResponse.status === 200) {
+        let requireData = null;
+        // show specific data for entrepreneur
+        if (getUser?.role === 'Admin') {
+          requireData = apiResponse?.data?.data;
+          setRows(requireData);
+        }
+        else { }
+      }
+      else { console.log('something went wrong during data fetching');}
+    }
+    fetchEntrepreneurs();
+  }, [refresh]);
+
+  return (
+    <>
+      <DialogBox />
+      <Toaster />
+      <Box sx={{ width: '80%' }} className='mx-auto py-12 px-10'>
+        <h2 className='text-2xl text-gray-600 text-center pb-4 underline'>Entrepreneur Profile Data</h2>
+        <Paper sx={{ width: '100%', mb: 2 }}>
+          <EnhancedTableToolbar numSelected={selected.length} />
+          <TableContainer>
+            <Table
+              sx={{ minWidth: 750 }}
+              aria-labelledby="tableTitle"
+              size={dense ? 'small' : 'medium'}
+            >
+              <EnhancedTableHead
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={rows.length}
+              />
+              <TableBody>
+                {rows.map((row, index) => {
+                  const isItemSelected = selected.includes(row._id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
+
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row._id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row._id}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{
+                            'aria-labelledby': labelId,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.fullName}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.email}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.phoneNumber}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>
+                        
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_HOSTNAME}${row?.profilePicture[0]}`}
+                          alt="Entrepreneur profile picture"
+                          title={row.fullName}
+                          style={{ width: '70px', objectFit: 'cover', borderRadius: '10px' }}
+                        />
+                    </TableCell>
+                      
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.location}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.industry}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: 'start' }}>{row.Bios}</TableCell>
+                      <TableCell align="right">{row.skills}</TableCell>
+                    </TableRow>
+                  );
+                })}
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: (dense ? 33 : 53) * emptyRows,
+                    }}
+                  >
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+        <FormControlLabel
+          control={<Switch checked={dense} onChange={handleChangeDense} />}
+          label="Dense padding"
+        />
+      </Box>
+      {isModalOpen && <UserForm title={"Maintain Entrepreneur Profile"} isOpen={isModalOpen} closeHandler={modalCloseHandler} activeUser={activeUser} fields={entrepreneurSchema} data={activeCompany} updateId={id} />}
+    </>
+  );
+}
+export default Entrepreneur;
