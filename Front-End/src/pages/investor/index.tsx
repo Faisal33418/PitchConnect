@@ -186,6 +186,7 @@ const headCells: readonly HeadCell[] = [
   },
   {
     id: 'createdAt',
+
     numeric: false,
     disablePadding: false,
     label: 'Created Date',
@@ -616,4 +617,8 @@ const Investor = () => {
     </>
   );
 }
+
+
+
+
 export default Investor;
