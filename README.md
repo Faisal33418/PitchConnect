@@ -1,2 +1,3 @@
 # PitchConnect
-Elevate Your Pitch Secure Your Future
+Elevate your Pitch Secure your Future   
+ 
