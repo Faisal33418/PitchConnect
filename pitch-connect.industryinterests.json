@@ -1,0 +1,34 @@
+[{
+  "_id": {
+    "$oid": "670d39f0ae36ca336121ea05"
+  },
+  "industries": [
+    "Technology",
+    "Finance",
+    "Healthcare",
+    "Education",
+    "Manufacturing",
+    "Retail",
+    "Transportation",
+    "Agriculture",
+    "Energy",
+    "Construction",
+    "Telecommunications",
+    "Entertainment",
+    "Real Estate",
+    "Automotive",
+    "Hospitality",
+    "Aerospace",
+    "Pharmaceutical",
+    "Logistics",
+    "Insurance",
+    "Food and Beverage"
+  ],
+  "createdAt": {
+    "$date": "2024-10-14T15:34:08.503Z"
+  },
+  "updatedAt": {
+    "$date": "2024-10-14T15:34:08.503Z"
+  },
+  "__v": 0
+}]
