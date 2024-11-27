@@ -1,23 +1,11 @@
-import { Typography } from "@mui/material";
+// React Imports
 import React, { useRef, useState } from 'react';
-import {
-    Button,
-    TextField,
-    Grid,
-    Box,
-    Container,
-    InputLabel,
-    IconButton,
-    Input,
-    FormControl,
-} from '@mui/material';
-import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
-import { useRecordWebcam } from 'react-record-webcam';
-import MicOffIcon from '@mui/icons-material/MicOff';
-import DownloadIcon from '@mui/icons-material/Download';
-import UserForm from "@/components/form";
+import toast, { Toaster } from 'react-hot-toast';
 
+// MUI Imports
+import { MenuItem, Select, Typography } from "@mui/material";
+import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import { Button, Grid, Box, Container, InputLabel, IconButton, Input, FormControl } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -37,25 +25,22 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
-import { businessDocuments, companyProfile, videoImage } from '@/layout/user-data';
-import APIs from '@/utils/api-handler';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import toast, { Toaster } from 'react-hot-toast';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Image from "next/image";
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import CloseIcon from '@mui/icons-material/Close';
-
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import DescriptionIcon from '@mui/icons-material/Description';
 
+// Normal Imports
+import { businessDocuments, videoImage } from '@/layout/user-data';
+import APIs from '@/utils/api-handler';
+import UserForm from "@/components/form";
 
 const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
@@ -120,7 +105,11 @@ interface HeadCell {
     label: string;
     numeric: boolean;
 }
-
+let userRole;
+if (typeof window !== 'undefined') {
+    userRole = localStorage.getItem('user');
+    userRole = JSON.parse(userRole);
+}
 const headCells: readonly HeadCell[] = [
     // {
     //   id: '_id',
@@ -130,15 +119,27 @@ const headCells: readonly HeadCell[] = [
     // },
     {
         id: 'title',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Documents Title',
     },
     {
         id: 'documents',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Documents',
+    },
+    {
+        id: 'pitchTitle',
+        numeric: false,
+        disablePadding: false,
+        label: 'Company',
+    },
+    {
+        id: 'companyOwner',
+        numeric: false,
+        disablePadding: false,
+        label: 'Owner Email',
     },
 ];
 
@@ -202,7 +203,7 @@ interface EnhancedTableToolbarProps {
     numSelected: number;
 }
 
-const DocumentUpload = () => {
+const DocumentUpload = ({ searchingTxt = null }) => {
     const [logo, setLogo] = useState<File | null>(null);
     const [video, setVideo] = useState<File | null>(null);
     const [order, setOrder] = useState<Order>('asc');
@@ -222,6 +223,14 @@ const DocumentUpload = () => {
     const [title, setTitle] = useState('');
     const [documents, setDocuments] = useState<File[]>([]);
     const documentsInputRef = useRef<HTMLInputElement>(null);
+    const [isChecked, setIsChecked] = useState(false);
+    const [companies, setCompanies] = useState([]);
+    const [companyId, setCompanyId] = useState(null);
+
+    // Handle checkbox state change
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked);
+    };
 
     // Handle change for document title
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,7 +259,7 @@ const DocumentUpload = () => {
         // Prepare FormData for the API request
         const formData = new FormData();
         formData.append('title', title);
-        formData.append('entrepreneurId', user?._id);
+        formData.append('companyId', companyId);
 
         // Append all selected documents
         documents.forEach((file) => formData.append('documents', file));
@@ -263,7 +272,6 @@ const DocumentUpload = () => {
             if (documentsInputRef.current) documentsInputRef.current.value = ''; // Reset input field
         }
     };
-    // Modal Close Handler
     const modalCloseHandler = () => {
         setIsModalOpen(false);
     }
@@ -352,11 +360,8 @@ const DocumentUpload = () => {
                         id="tableTitle"
                         component="div"
                     >
-
                     </Typography>
                 )}
-                {/* <Tooltip title="Register New Company"> */}
-
                 {/* </Tooltip> */}
                 {numSelected > 0 ? (
                     <>
@@ -400,13 +405,6 @@ const DocumentUpload = () => {
         setOpen(true);
     }
 
-    const handleOpenVideo = () => {
-        setVideoModal(true);
-    }
-    const handleCloseVideo = () => {
-        setVideoModal(false);
-    }
-
     // Dialog Box Handler
     const DialogBox = () => {
         return (
@@ -422,13 +420,11 @@ const DocumentUpload = () => {
                     <DeleteForeverIcon color="error" />
                     <Typography variant="h6">Confirm Deletion</Typography>
                 </DialogTitle>
-
                 <DialogContent>
                     <Typography id="delete-dialog-description" variant="body1">
                         Are you sure you want to delete this item? This action is permanent and cannot be undone.
                     </Typography>
                 </DialogContent>
-
                 <DialogActions sx={{ justifyContent: 'space-between', padding: 2 }}>
                     <Button onClick={handleClose} variant="outlined" color="primary">
                         Cancel
@@ -469,43 +465,65 @@ const DocumentUpload = () => {
         setRefresh(!refresh);
     }
 
+    const handleCompanyChange = (event: SelectChangeEvent) => {
+        setCompanyId(event.target.value as string);
+    };
+
     React.useEffect(() => {
+        let user = null;
         const getActiveUser = () => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user = JSON.parse(localStorage.getItem('user') || '{}');
             setActiveUser(user);
-            // setActiveCompany(activeCompany[0]);
         }
         getActiveUser();
+        const getCompanies = async () => {
+            try {
+                const endPoint = `company/get-companies/${user?._id}`;
+                const method = 'GET';
+                const apiResponse = await APIs(endPoint, null, method, {}, null, false);
+                if (apiResponse.status === 200) {
+                    setCompanies(apiResponse?.data?.data);
+                } else {
+                    console.error('Invalid response format:', apiResponse);
+                }
+            } catch (error) {
+                console.error('Failed to fetch industries:', error);
+            }
+        };
+        getCompanies();
     }, []);
 
     React.useEffect(() => {
-        const fetchVideoImages = async () => {
-
+        const fetchDocuments = async () => {
             const token = localStorage.getItem('token');
             let getUser = localStorage.getItem('user');
             getUser = JSON.parse(getUser);
-
-            const endPoint = 'documents', id = null, method = 'GET', headers = {
+            // fetch documents based on USER-ROLE
+            const endPoint = getUser?.role === 'Admin' ? 'documents/entrepreneur-documents' : `documents/entrepreneur-documents/${getUser?._id}`, id = null, method = 'GET', headers = {
                 'Authorization': `Bearer ${token}`
             }, reqData = null;
 
             const apiResponse = await APIs(endPoint, id, method, headers, reqData, false);
-
             if (apiResponse?.status === 200) {
                 let requireData = null;
-                // show specific data for entrepreneur
                 if (getUser?.role === 'Entrepreneur') {
-                    requireData = apiResponse?.data?.data?.filter(item => item?.entrepreneurId === getUser?._id);
+                    requireData = apiResponse?.data?.data;
+                    if (searchingTxt) {
+                        requireData = requireData.filter(company => company?.pitchTitle === searchingTxt);
+                    }
                     setRows(requireData);
                 }
                 else if (getUser?.role === 'Admin') {
                     requireData = apiResponse?.data?.data;
+                    if (searchingTxt) {
+                        requireData = requireData.filter(company => company?.pitchTitle === searchingTxt || company?.entrepreneurEmail === searchingTxt);
+                      }
                     setRows(requireData);
                 }
             }
         }
-        fetchVideoImages();
-    }, [refresh]);
+        fetchDocuments();
+    }, [searchingTxt, refresh]);
 
     return (
         <div className="flex flex-col mx-auto mb-20">
@@ -573,33 +591,74 @@ const DocumentUpload = () => {
                                     </Typography>
                                 )}
                             </Grid>
-
+                            <Grid item xs={10}>
+                                <FormControl variant="standard" fullWidth>
+                                    <InputLabel id="demo-simple-select-standard-label">Select Company</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={companyId}
+                                        onChange={handleCompanyChange}
+                                        label="Select Company"
+                                    >
+                                        {companies.map((company) => {
+                                            return <MenuItem key={company?._id} value={company?._id}>{company?.pitchTitle}</MenuItem>
+                                        })}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                             <div className="flex justify-center items-center ml-5 mt-6">
                                 <div className="bg-gray-100 p-6 rounded-md shadow-md max-w-md">
                                     <div className="flex items-center space-x-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-6 w-6 text-red-600"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M12 9v2m0 4h.01M12 18a6 6 0 100-12 6 6 0 000 12z"
+                                            />
                                         </svg>
                                         <h1 className="text-xl font-bold text-red-600">Disclaimer</h1>
                                     </div>
                                     <p className="mt-4 text-gray-700">
-                                        By uploading documents, videos, images, or company details, you confirm that you own the rights to the content and that it does not infringe any third-party copyrights or intellectual property.
-                                        Pitch Connect is not liable for verifying ownership, and you take full responsibility for any claims.
-                                        By proceeding, you agree to these terms.
+                                        By uploading documents, videos, images, or company details, you
+                                        confirm that you own the rights to the content and that it does not
+                                        infringe any third-party copyrights or intellectual property. Pitch
+                                        Connect is not liable for verifying ownership, and you take full
+                                        responsibility for any claims. By proceeding, you agree to these
+                                        terms.
                                     </p>
                                     <div className="mt-6 flex items-center">
-                                        <input id="agree" type="checkbox" className="w-6 h-6 border-gray-300 rounded-md text-blue-600 focus:ring-blue-500 focus:ring-2" />
-                                            <label htmlFor="agree" className="ml-2 text-gray-900 text-lg cursor-pointer">I Agree</label>
+                                        <input
+                                            id="agree"
+                                            type="checkbox"
+                                            className="w-6 h-6 border-gray-300 rounded-md text-blue-600 focus:ring-blue-500 focus:ring-2"
+                                            checked={isChecked}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <label
+                                            htmlFor="agree"
+                                            className="ml-2 text-gray-900 text-lg cursor-pointer"
+                                        >
+                                            I Agree
+                                        </label>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Submit Button */}
-                            <Grid item xs={10}>
+                            <Grid item xs={10} className="mt-4">
                                 <Button
                                     type="submit"
                                     fullWidth
                                     variant="contained"
+                                    disabled={!isChecked} // Button enabled/disabled based on checkbox state
                                     sx={{ mt: 3, mb: 2 }}
                                 >
                                     Submit
@@ -626,10 +685,10 @@ const DocumentUpload = () => {
                                 orderBy={orderBy}
                                 onSelectAllClick={handleSelectAllClick}
                                 onRequestSort={handleRequestSort}
-                                rowCount={rows.length}
+                                rowCount={rows?.length}
                             />
                             <TableBody>
-                                {rows.map((row, index) => {
+                                {rows?.map((row, index) => {
                                     const isItemSelected = selected.includes(row._id);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -698,7 +757,9 @@ const DocumentUpload = () => {
                                                     ))}
                                                 </Box>
                                             </TableCell>
-
+                                            <TableCell align="right" sx={{ textAlign: 'start' }}>{row?.pitchTitle}</TableCell>
+                                            {/* <TableCell align="right" sx={{ textAlign: 'start' }}>{row?.entrepreneurEmail}</TableCell> */}
+                                            <TableCell align="right" sx={{ textAlign: 'start' }}>{row?.entrepreneurEmail}</TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -717,7 +778,7 @@ const DocumentUpload = () => {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25]}
                         component="div"
-                        count={rows.length}
+                        count={rows?.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

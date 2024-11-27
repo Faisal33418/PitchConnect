@@ -1,9 +1,7 @@
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import InfoIcon from '@mui/icons-material/Info';
-import { useEffect } from 'react';
-
-const profileIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="gray" d="M20 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-3 12H7a1 1 0 1 0 0 2h10a1 1 0 1 0 0-2m-7-8H8a2 2 0 0 0-1.995 1.85L6 9v2a2 2 0 0 0 1.85 1.995L8 13h2a2 2 0 0 0 1.995-1.85L12 11V9a2 2 0 0 0-1.85-1.995zm7 4h-3a1 1 0 0 0-.117 1.993L14 13h3a1 1 0 0 0 .117-1.993zm-7-2v2H8V9zm7-2h-3a1 1 0 1 0 0 2h3a1 1 0 1 0 0-2" /></g></svg>;
+import LightbulbCircleIcon from '@mui/icons-material/LightbulbCircle';
+import SocialDistanceIcon from '@mui/icons-material/SocialDistance';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
 const navItems = [
     {
@@ -14,37 +12,33 @@ const navItems = [
         title: 'Help',
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24"><path fill="#808080" d="M11.95 18q.525 0 .888-.363t.362-.887t-.362-.888t-.888-.362t-.887.363t-.363.887t.363.888t.887.362m-.9-3.85h1.85q0-.825.188-1.3t1.062-1.3q.65-.65 1.025-1.238T15.55 8.9q0-1.4-1.025-2.15T12.1 6q-1.425 0-2.312.75T8.55 8.55l1.65.65q.125-.45.563-.975T12.1 7.7q.8 0 1.2.438t.4.962q0 .5-.3.938t-.75.812q-1.1.975-1.35 1.475t-.25 1.825M12 22q-2.075 0-3.9-.787t-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>,
     },
-    // {
-    //     title: 'Ideal Pitch Room',
-    //     icon: <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24"><path fill="#808080" d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" /></svg>,
-    // }
 ];
 
 const MenuItems = [
-    // {
-    //     title: "Investor Profile",
-    //     icon: profileIcon,
-    //     link: "/investor",
-    // },
     {
         title: "Find Entrepreneurs",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 16 16"><path fill="#808080" fill-rule="evenodd" d="M14 4H2V3h12zM9.456 6.005a2.451 2.451 0 1 0 0 4.902a2.451 2.451 0 0 0 0-4.902m-3.451 2.45a3.451 3.451 0 1 1 6.219 2.062l1.717 1.716l-.708.707l-1.716-1.716a3.451 3.451 0 0 1-5.512-2.768M5 8.5H2v-1h3zM6 13H2v-1h4z" clip-rule="evenodd" /></svg>,
         link: "/find-entrepreneurs",
     },
     {
-        title: "Company Info",
-        icon: <InfoIcon fontSize='small' color='action' className='sidebar-icons' />,
-        link: "/company-info",
+        title: "Idea Pitches",
+        icon: <TipsAndUpdatesIcon fontSize='small' color='action' className='sidebar-icons' />,
+        link: "/entrepreneur-business",
     },
     {
-        title: "Video and Image",
-        icon: <PhotoCameraIcon fontSize='small' color='action' className='sidebar-icons' />,
-        link: "/video-image",
+        title: "Featured Ideas",
+        icon: <LightbulbCircleIcon fontSize='small' color='action' className='sidebar-icons' />,
+        link: "/#feature",
     },
     {
-        title: "Documents Upload",
-        icon: <AttachFileIcon fontSize='small' color='action' className='sidebar-icons' />,
-        link: "/document-upload",
+        title: "Social Properity",
+        icon: <SocialDistanceIcon fontSize='small' color='action' className='sidebar-icons' />,
+        link: "/#social",
+    },
+    {
+        title: "Interprated Communication",
+        icon: <ConnectWithoutContactIcon fontSize='small' color='action' className='sidebar-icons' />,
+        link: "/#communication",
     },
 ];
 const AdminItems = [

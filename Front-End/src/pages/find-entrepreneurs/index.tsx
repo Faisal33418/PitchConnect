@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import APIs from '@/utils/api-handler';
 import { PlayCircleOutline, DownloadOutlined } from '@mui/icons-material'; // MUI Icons
-
-import { Modal } from '@mui/material'; // You can replace this with any modal
+import { Modal } from '@mui/material'; // Modal from MUI
 
 const FindEntrepreneurs = () => {
     const [entrepreneurs, setEntrepreneurs] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedEntrepreneur, setSelectedEntrepreneur] = useState(null); // For modal
+    const [selectedCompany, setSelectedCompany] = useState(null); // For modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [hoveredVideoId, setHoveredVideoId] = useState(null); // For play icon on hover
+    const placeholderImage = '/find-entrepreneur/no-media-found.png';
 
     useEffect(() => {
         const fetchEntrepreneurs = async () => {
             const token = localStorage.getItem('token');
-            let getUser = JSON.parse(localStorage.getItem('user'));
-
             const endPoint = 'entrepreneur/find';
-            const headers = { 'Authorization': `Bearer ${token}` };
+            const headers = { Authorization: `Bearer ${token}` };
 
             const apiResponse = await APIs(endPoint, null, 'GET', headers, null, false);
             if (apiResponse?.status === 200) {
@@ -29,18 +27,20 @@ const FindEntrepreneurs = () => {
         fetchEntrepreneurs();
     }, []);
 
-    const filteredEntrepreneurs = entrepreneurs.filter((entrepreneur) =>
-        entrepreneur.companies.some((company) =>
-            company.pitchTitle.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
+    const filteredCompanies = entrepreneurs
+        .flatMap((entrepreneur) => entrepreneur.companies.map((company) => ({
+            ...company,
+            entrepreneurName: entrepreneur.fullName,
+            entrepreneurEmail: entrepreneur.email,
+            entrepreneurProfilePicture: entrepreneur.profilePicture,
+        })))
+        .filter((company) => company.pitchTitle?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const handleOpenModal = (entrepreneur) => {
-        setSelectedEntrepreneur(entrepreneur);
+    const handleOpenModal = (company) => {
+        setSelectedCompany(company);
         setIsModalOpen(true);
     };
 
-    console.log({ entrepreneurs });
     const handleCloseModal = () => setIsModalOpen(false);
 
     return (
@@ -58,96 +58,99 @@ const FindEntrepreneurs = () => {
                 />
             </div>
 
-            {/* Entrepreneurs List */}
+            {/* Companies List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredEntrepreneurs.map((entrepreneur) => (
-                    entrepreneur.videoImages.map((videoImage, index) => (
-                        <div key={videoImage._id} className="bg-white rounded-lg shadow-md p-6">
-                            <div
-                                className="relative group"
-                                onMouseEnter={() => setHoveredVideoId(videoImage._id)}
-                                onMouseLeave={() => setHoveredVideoId(null)}
-                            >
-                                <img
-                                    // src={videoImage.logoBanner[0]}
-                                    src={`${process.env.NEXT_PUBLIC_HOSTNAME}${videoImage.logoBanner[0]}`}
-                                    alt="Banner"
-                                    className="h-48 w-full object-cover rounded-lg"
+                {filteredCompanies.map((company) => (
+                    <div key={company._id} className="bg-white rounded-lg shadow-md p-6">
+                        <div
+                            className="relative group"
+                            onMouseEnter={() => setHoveredVideoId(company.videoImages[0]?._id)}
+                            onMouseLeave={() => setHoveredVideoId(null)}
+                        >
+                            <img
+                                src={
+                                    company.videoImages[0]?.logoBanner[0]
+                                        ? `${process.env.NEXT_PUBLIC_HOSTNAME}${company.videoImages[0]?.logoBanner[0]}`
+                                        : placeholderImage
+                                }
+                                alt="Banner"
+                                className="h-48 w-full object-cover rounded-lg"
+                            />
+                            {hoveredVideoId === company.videoImages[0]?._id && (
+                                <PlayCircleOutline
+                                    fontSize="large"
+                                    className="absolute inset-0 m-auto text-white opacity-80 group-hover:opacity-100 cursor-pointer"
+                                    onClick={() =>
+                                        company.videoImages[0] && window.open(
+                                            `${process.env.NEXT_PUBLIC_HOSTNAME}${company.videoImages[0]?.video[0]}`,
+                                            '_blank'
+                                        )
+                                    }
                                 />
-                                {hoveredVideoId === videoImage._id && (
-                                    <PlayCircleOutline
-                                        fontSize='large'
-                                        className="absolute inset-0 m-auto text-white opacity-80 group-hover:opacity-100 cursor-pointer"
-                                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_HOSTNAME}${videoImage.video[0]}`, '_blank')}
-                                    />
-                                )}
-                            </div>
-
-                            {/* Entrepreneur Info */}
-                            {/* {entrepreneur.companies.map((company) => ( */}
-                                <div key={entrepreneur?.companies[index]._id} className="mt-4">
-                                    <h3 className="text-lg font-semibold">{entrepreneur?.companies[index].pitchTitle}</h3>
-                                    <p className="text-gray-600">{entrepreneur?.companies[index].shortSummary}</p>
-                                    <p className="font-bold text-green-500">
-                                        Investment Range: {entrepreneur?.companies[index].investmentRange}
-                                    </p>
-
-                                    <button
-                                        className="mt-2 text-blue-500 flex items-center"
-                                        onClick={() => handleOpenModal(entrepreneur)}
-                                    >
-                                        Read More <PlayCircleOutline className="ml-2" />
-                                    </button>
-                                </div>
-                            {/* ))} */}
+                            )}
                         </div>
-                    ))
+
+                        {/* Company Info */}
+                        <div className="mt-4">
+                            <h3 className="text-lg font-semibold">{company.pitchTitle || 'No Title'}</h3>
+                            <p className="text-gray-600">{company.shortSummary || 'No summary available'}</p>
+                            <p className="font-bold text-green-500">
+                                Investment Range: {company.investmentRange || 'N/A'}
+                            </p>
+                            <button
+                                className="mt-2 text-blue-500 flex items-center"
+                                onClick={() => handleOpenModal(company)}
+                            >
+                                Read More <PlayCircleOutline className="ml-2" />
+                            </button>
+                        </div>
+                    </div>
                 ))}
             </div>
 
-            {/* Modal for Entrepreneur Details */}
-            {selectedEntrepreneur && (
+            {/* Modal for Company Details */}
+            {selectedCompany && (
                 <Modal open={isModalOpen} onClose={handleCloseModal}>
                     <div className="bg-white p-8 rounded-lg max-w-2xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-4">{selectedEntrepreneur.fullName}</h2>
-                        <img
-                            src={`${process.env.NEXT_PUBLIC_HOSTNAME}${selectedEntrepreneur.profilePicture[0]}`}
-                            alt="Profile"
-                            className="h-32 w-32 object-cover rounded-full mx-auto mb-4"
-                        />
-                        <p><strong>Email:</strong> {selectedEntrepreneur.email}</p>
-                        <p><strong>Phone:</strong> {selectedEntrepreneur.phoneNumber}</p>
-                        <p><strong>Location:</strong> {selectedEntrepreneur.location}</p>
-                        <p><strong>Industry:</strong> {selectedEntrepreneur.industry}</p>
-                        <p><strong>Bios:</strong> {selectedEntrepreneur.Bios}</p>
-                        <p><strong>Skills:</strong> {selectedEntrepreneur.skills}</p>
-
+                        <h2 className="text-2xl font-bold mb-4">{selectedCompany.pitchTitle}</h2>
+                        <p><strong>Entrepreneur:</strong> {selectedCompany.entrepreneurName}</p>
+                        <p><strong>Email:</strong> {selectedCompany.entrepreneurEmail}</p>
+                        <p><strong>Summary:</strong> {selectedCompany.shortSummary || 'N/A'}</p>
+                        <p><strong>Investment Range:</strong> {selectedCompany.investmentRange || 'N/A'}</p>
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold">Documents</h3>
-                            {selectedEntrepreneur.documents.map((doc) => (
-                                <div key={doc._id} className="flex items-center gap-2 mt-2">
-                                    {doc.documents.map((file) => (
-                                        <div key={file} className="relative group flex">
-                                            <span className='flex gap-2'>
-                                                <a
-                                                    href={file}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-500"
-                                                >
-                                                    {file.split('.').pop().toUpperCase()} Document
-                                                </a>
-                                                <DownloadOutlined
-                                                    className=" right-0 text-gray-400 group-hover:text-blue-500 cursor-pointer"
-                                                    onClick={() => window.open(`${process.env.NEXT_PUBLIC_HOSTNAME}${file}`, '_blank')}
-                                                />
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
+                            {selectedCompany.documents?.length > 0 ? (
+                                selectedCompany.documents.map((doc) => (
+                                    <div key={doc._id} className="flex items-center gap-2 mt-2">
+                                        {doc.documents.map((file) => (
+                                            <div key={file} className="relative group flex">
+                                                <span className="flex gap-2">
+                                                    <a
+                                                        href={`${process.env.NEXT_PUBLIC_HOSTNAME}${file}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-500"
+                                                    >
+                                                        {file.split('.').pop().toUpperCase()} Document
+                                                    </a>
+                                                    <DownloadOutlined
+                                                        className="text-gray-400 group-hover:text-blue-500 cursor-pointer"
+                                                        onClick={() =>
+                                                            window.open(
+                                                                `${process.env.NEXT_PUBLIC_HOSTNAME}${file}`,
+                                                                '_blank'
+                                                            )
+                                                        }
+                                                    />
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No documents available</p>
+                            )}
                         </div>
-
                         <center>
                             <button
                                 className="mt-4 w-24 bg-red-500 text-white py-2 rounded"

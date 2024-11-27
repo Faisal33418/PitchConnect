@@ -1,23 +1,16 @@
-import { Typography } from "@mui/material";
+// React Imports
 import React, { useRef, useState } from 'react';
-import {
-    Button,
-    TextField,
-    Grid,
-    Box,
-    Container,
-    InputLabel,
-    IconButton,
-    Input,
-    FormControl,
-} from '@mui/material';
+import toast, { Toaster } from 'react-hot-toast';
+import { useRecordWebcam } from 'react-record-webcam';
+import Image from "next/image";
+
+// MUI Imports
+import { MenuItem, Select, Typography } from "@mui/material";
+import { Button, Grid, Box, Container, InputLabel, IconButton, Input, FormControl } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
-import { useRecordWebcam } from 'react-record-webcam';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import DownloadIcon from '@mui/icons-material/Download';
-import UserForm from "@/components/form";
-
 import { alpha } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -29,7 +22,6 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
 import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
@@ -37,23 +29,25 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
-import { companyProfile, videoImage } from '@/layout/user-data';
-import APIs from '@/utils/api-handler';
+import { videoImage } from '@/layout/user-data';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import toast, { Toaster } from 'react-hot-toast';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Image from "next/image";
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
+
+// Normal Imports
+import UserForm from "@/components/form";
+import APIs from '@/utils/api-handler';
 
 interface Data {
     id: string;
     logoBanner: string;
     video: string;
+    companyId: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -86,7 +80,11 @@ interface HeadCell {
     label: string;
     numeric: boolean;
 }
-
+let userRole = null;
+if (typeof window !== 'undefined') {
+    userRole = localStorage.getItem('user');
+    userRole = userRole ? JSON.parse(userRole) : 'Guest';
+}
 const headCells: readonly HeadCell[] = [
     // {
     //   id: '_id',
@@ -96,13 +94,25 @@ const headCells: readonly HeadCell[] = [
     // },
     {
         id: 'logoBanner',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Logo Banner Image',
     },
     {
+        id: 'company',
+        numeric: false,
+        disablePadding: false,
+        label: 'Company',
+    },
+    {
+        id: 'entrepreneurEmail',
+        numeric: false,
+        disablePadding: false,
+        label: 'Entrepreneur Email',
+    },
+    {
         id: 'video',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Video',
     },
@@ -168,7 +178,7 @@ interface EnhancedTableToolbarProps {
     numSelected: number;
 }
 
-const VideoImage = () => {
+const VideoImage = ({ searchingTxt = null }) => {
     const [logo, setLogo] = useState<File | null>(null);
     const [video, setVideo] = useState<File | null>(null);
     const [order, setOrder] = useState<Order>('asc');
@@ -185,6 +195,8 @@ const VideoImage = () => {
     const [open, setOpen] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [videoModal, setVideoModal] = useState(false);
+    const [companies, setCompanies] = useState([]);
+    const [companyId, setCompanyId] = useState(null);
 
     const logoInputRef = useRef();
     const videoInputRef = useRef();
@@ -215,16 +227,13 @@ const VideoImage = () => {
         const formData = new FormData();
         formData.append('logoBanner', logo);
         formData.append('video', video);
-        formData.append('entrepreneurId', user?._id);
+        formData.append('companyId', companyId);
 
         const apiResponse = await APIs(endPoint, id, method, headers, formData, true);
         if (apiResponse?.status === 201) {
             toast.success(apiResponse?.data?.message);
             logoInputRef.current.value = '';
             videoInputRef.current.value = '';
-            // setTimeout(() => {
-            //     setOpen(false);
-            // }, 1000);
         }
     };
 
@@ -549,13 +558,33 @@ const VideoImage = () => {
         setRefresh(!refresh);
     }
 
+    const handleCompanyChange = (event: SelectChangeEvent) => {
+        setCompanyId(event.target.value as string);
+    };
+
+
     React.useEffect(() => {
+        let user = null;
         const getActiveUser = () => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user = JSON.parse(localStorage.getItem('user') || '{}');
             setActiveUser(user);
-            // setActiveCompany(activeCompany[0]);
         }
         getActiveUser();
+        const getCompanies = async () => {
+            try {
+                const endPoint = `company/get-companies/${user?._id}`;
+                const method = 'GET';
+                const apiResponse = await APIs(endPoint, null, method, {}, null, false);
+                if (apiResponse.status === 200) {
+                    setCompanies(apiResponse?.data?.data);
+                } else {
+                    console.error('Invalid response format:', apiResponse);
+                }
+            } catch (error) {
+                console.error('Failed to fetch industries:', error);
+            }
+        };
+        getCompanies();
     }, []);
 
     React.useEffect(() => {
@@ -565,28 +594,32 @@ const VideoImage = () => {
             let getUser = localStorage.getItem('user');
             getUser = JSON.parse(getUser);
 
-            const endPoint = 'video-image', id = null, method = 'GET', headers = {
+            const endPoint = getUser?.role === 'Admin' ? 'video-image/entrepreneur-media' : `video-image/entrepreneur-media/${getUser?._id}`, id = null, method = 'GET', headers = {
                 'Authorization': `Bearer ${token}`
             }, reqData = null;
 
             const apiResponse = await APIs(endPoint, id, method, headers, reqData, false);
-            console.log('companies', apiResponse);
-
             if (apiResponse?.status === 200) {
                 let requireData = null;
                 // show specific data for entrepreneur
                 if (getUser?.role === 'Entrepreneur') {
-                    requireData = apiResponse?.data?.data?.filter(item => item?.entrepreneurId === getUser?._id);
+                    requireData = apiResponse?.data?.data;
+                    if (searchingTxt) {
+                        requireData = requireData.filter(company => company?.pitchTitle === searchingTxt);
+                    }
                     setRows(requireData);
                 }
                 else if (getUser?.role === 'Admin') {
                     requireData = apiResponse?.data?.data;
+                    if (searchingTxt) {
+                        requireData = requireData.filter(company => company?.pitchTitle === searchingTxt || company?.entrepreneurEmail === searchingTxt);
+                    }
                     setRows(requireData);
                 }
             }
         }
         fetchVideoImages();
-    }, [refresh]);
+    }, [searchingTxt, refresh]);
 
     return (
         <div className="flex flex-col mx-auto mb-20">
@@ -658,6 +691,22 @@ const VideoImage = () => {
                                     </Typography>
                                 )}
                             </Grid>
+                            <Grid item xs={12}>
+                                <FormControl variant="standard" fullWidth>
+                                    <InputLabel id="demo-simple-select-standard-label">Select Company</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={companyId}
+                                        onChange={handleCompanyChange}
+                                        label="Select Company"
+                                    >
+                                        {companies.map((company) => {
+                                            return <MenuItem key={company?._id} value={company?._id}>{company?.pitchTitle}</MenuItem>
+                                        })}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
 
                             {/* Submit Button */}
                             <Grid item xs={12}>
@@ -710,16 +759,8 @@ const VideoImage = () => {
                                             selected={isItemSelected}
                                             sx={{ cursor: 'pointer' }}
                                         >
-                                            <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={isItemSelected}
-                                                    inputProps={{
-                                                        'aria-labelledby': labelId,
-                                                    }}
-                                                />
-                                            </TableCell>
                                             {/* Banner Image */}
+                                            <TableCell align="right" sx={{ textAlign: 'start' }}>{ }</TableCell>
                                             <TableCell align="right" sx={{ textAlign: 'start' }}>
                                                 <img
                                                     src={`${process.env.NEXT_PUBLIC_HOSTNAME}${row.logoBanner}`}
@@ -727,7 +768,8 @@ const VideoImage = () => {
                                                     style={{ width: '20%', objectFit: 'cover', borderRadius: 10 }}
                                                 />
                                             </TableCell>
-
+                                            <TableCell align="right" sx={{ textAlign: 'start' }}>{row?.pitchTitle}</TableCell>
+                                            <TableCell align="right" sx={{ textAlign: 'start' }}>{row?.entrepreneurEmail}</TableCell>
                                             {/* Video with Modal */}
                                             <TableCell align="right" sx={{ textAlign: 'center' }}>
                                                 <Box sx={{ position: 'relative', cursor: 'pointer' }} onClick={handleOpenVideo}>

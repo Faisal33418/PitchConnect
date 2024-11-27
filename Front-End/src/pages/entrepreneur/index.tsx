@@ -24,7 +24,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
 import UserForm from '@/components/form';
-import { companyProfile, entrepreneurSchema, investorSchema } from '@/layout/user-data';
+import { entrepreneurSchema } from '@/layout/user-data';
 import { Button } from '@mui/material';
 import APIs from '@/utils/api-handler';
 import Dialog from '@mui/material/Dialog';

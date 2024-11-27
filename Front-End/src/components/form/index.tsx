@@ -9,8 +9,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import APIs from "@/utils/api-handler";
 import { Button, Checkbox, IconButton, Input, ListItemText, Modal } from "@mui/material";
 import toast, { Toaster } from "react-hot-toast";
-import Image from "next/image";
-
 
 const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null, updateId = null }) => {
 
@@ -20,10 +18,14 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
     const [startUp, setStartUp] = useState([]);
     const [investType, setInvestType] = useState([]);
     const [industries, setIndustries] = useState([]);
+    const [entrepreneurs, setEntrepreneurs] = useState([]);
+    const [companies, setCompanies] = useState([]);
+    const [entre, setEntre] = useState(null);
+    const [comp, setComp] = useState(null);
     const [user, setUser] = useState([]);
     const [role, setRole] = useState(false);
     const [phone, setPhone] = React.useState(false);
-
+    const [hideEntre, setHideEntre] = React.useState(false);
 
     const useStyles = makeStyles((theme) => ({
         modal: {
@@ -154,8 +156,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
     };
 
     const onSubmit = async (values) => {
-
         try {
+            console.log('vd', values, entre);
             const formData = new FormData();
             let jsonData = null, endPoint: any = null, id: any = null, method: any = null, headers = null, reqData = null, isFormData = true, reqApproval = false;
             const action = localStorage.getItem('action');
@@ -165,18 +167,6 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                     endPoint = 'admin/update';
                     id = activeUser?._id;
                     method = "PUT";
-                    // const token = localStorage.getItem('token');
-                    // headers = {
-                    //     'Authorization': `Bearer ${token}`
-                    // };
-
-                    // formData.append('profilePicture', values.profilePicture);
-                    // // Append any other form fields if needed
-                    // Object.keys(values).forEach((key) => {
-                    //     if (key !== 'profilePicture') {
-                    //         formData.append(key, values[key]);
-                    //     }
-                    // });
                 }
                 else if (fields[0].name === 'pitchTitle') {
                     isFormData = false;
@@ -247,7 +237,6 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
 
                     formData.append('logoBanner', values.logoBanner);
                     formData.append('video', values.video);
-                    formData.append('entrepreneurId', existUser._id);
 
                     // Call API
                     reqData = (fields[0].name !== 'pitchTitle') ? formData : jsonData;
@@ -295,8 +284,6 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                         formData.append(`documents`, file);
                     });
                     formData.append('title', values.title);
-                    // formData.append('documents', values.documents);
-                    formData.append('entrepreneurId', existUser._id);
 
                     // Call API
                     reqData = (fields[0].name !== 'pitchTitle') ? formData : jsonData;
@@ -412,6 +399,7 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                     updateId = localStorage.getItem('actionId');
 
                     if (existCompany === 'company update') {
+                        setHideEntre(true);
                         endPoint = `company/update/${updateId}`;
                         method = "PUT";
                     }
@@ -435,8 +423,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                     let existUser = localStorage.getItem('user');
                     existUser = JSON.parse(existUser);
                     let existCompany = localStorage.getItem('action');
-
                     if (existCompany === 'video-image update') {
+                        setHideEntre(true);
                         endPoint = `video-image/update/${updateId}`;
                         method = "PUT";
                     }
@@ -449,7 +437,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
 
                     formData.append('logoBanner', values.logoBanner);
                     formData.append('video', values.video);
-                    formData.append('entrepreneurId', existUser._id);
+                    // formData.append('entrepreneurId', existUser._id);
+                    formData.append('companyId', comp);
                 }
                 else if (fields[0].name === 'title') {
                     isFormData = true;
@@ -457,8 +446,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                     let existUser = localStorage.getItem('user');
                     existUser = JSON.parse(existUser);
                     let existCompany = localStorage.getItem('action');
-
                     if (existCompany === 'document update') {
+                        setHideEntre(true);
                         endPoint = `documents/update/${updateId}`;
                         method = "PUT";
                     }
@@ -473,7 +462,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                     });
                     formData.append('title', values.title);
                     // formData.append('documents', values.documents);
-                    formData.append('entrepreneurId', existUser._id);
+                    // formData.append('entrepreneurId', existUser._id);
+                    formData.append('companyId', comp);
                 }
                 else { }
             }
@@ -565,6 +555,8 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
             }
         }
         optionHandler();
+        const existCompany = localStorage.getItem('action');
+        existCompany === 'company update' ? setHideEntre(true) : setHideEntre(false);
     }, []);
     const action = localStorage.getItem('action');
 
@@ -616,14 +608,12 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                 const endPoint = 'industry-interest';
                 const method = 'GET';
                 const apiResponse = await APIs(endPoint, null, method, {}, null, false);
-                // Assuming the API response is in the format { data: [ ...industries ] }
                 if (apiResponse.status === 200) {
                     // Format the data as required
                     const formattedData = apiResponse?.data?.data.map((item) => ({
                         label: item,
                         value: item
                     }));
-                    // Store the formatted data using `setIndustries`
                     setIndustries(formattedData);
                 } else {
                     console.error('Invalid response format:', apiResponse);
@@ -632,8 +622,37 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                 console.error('Failed to fetch industries:', error);
             }
         };
-
         getIndustries();
+        const getEntrepreneurs = async () => {
+            try {
+                const endPoint = 'entrepreneur/get-entrepreneur';
+                const method = 'GET';
+                const apiResponse = await APIs(endPoint, null, method, {}, null, false);
+                if (apiResponse.status === 200) {
+                    setEntrepreneurs(apiResponse?.data?.data);
+                } else {
+                    console.error('Invalid response format:', apiResponse);
+                }
+            } catch (error) {
+                console.error('Failed to fetch industries:', error);
+            }
+        };
+        getEntrepreneurs();
+        const getCompanies = async () => {
+            try {
+                const endPoint = 'company/get-companies';
+                const method = 'GET';
+                const apiResponse = await APIs(endPoint, null, method, {}, null, false);
+                if (apiResponse.status === 200) {
+                    setCompanies(apiResponse?.data?.data);
+                } else {
+                    console.error('Invalid response format:', apiResponse);
+                }
+            } catch (error) {
+                console.error('Failed to fetch industries:', error);
+            }
+        };
+        getCompanies();
     }, []);
     let imageUrl = localStorage.getItem('user');
     imageUrl = JSON.parse(imageUrl);
@@ -670,10 +689,9 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                                                 {fields.map((item, key) => (
                                                     <Grid key={key} item xs={8} sm={6}>
                                                         <FormControl fullWidth>
-                                                            {/* <span className="pb-3 text-sm">{item.label}</span> */}
 
                                                             {/* normal text and email Field hidden for all users */}
-                                                            {(item.name !== 'status' && item.name !== 'profilePicture' && item.name !== 'industryInterest' && item.name !== 'startupStagePreference' && item.name !== 'typeOfInvestment' && item.name !== 'industry' && item.name !== 'logoBanner' && item.name !== 'email' && item.name !== 'video' && item.name !== 'documents') && <Field
+                                                            {(item.name !== 'status' && item.name !== 'profilePicture' && item.name !== 'industryInterest' && item.name !== 'entrepreneurId' && item.name !== 'companyId' && item.name !== 'startupStagePreference' && item.name !== 'typeOfInvestment' && item.name !== 'industry' && item.name !== 'logoBanner' && item.name !== 'email' && item.name !== 'video' && item.name !== 'documents') && <Field
                                                                 component={TextField}
                                                                 label={item.label !== 'Profile Picture' && item.label}
                                                                 name={item.name}
@@ -811,7 +829,6 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                                                             )}
 
                                                             {/* rendering entrepreneur industries */}
-
                                                             {item.name === 'industry' && (
                                                                 <FormControl fullWidth variant="outlined">
                                                                     <InputLabel id="industry-select-label">{item.label}</InputLabel>
@@ -914,6 +931,33 @@ const UserForm = ({ title, isOpen, closeHandler, activeUser, fields, data = null
                                                                         </Select>
                                                                     </FormControl>
                                                                 </Grid>}
+                                                            {/* Companies list */}
+                                                            {(item.name === 'companyId' && !hideEntre) && (
+                                                                <Grid item xs={12} sm={12} md={12}>
+                                                                    <FormControl fullWidth variant="outlined">
+                                                                        <InputLabel id="demo-simple-select-outlined-label">{item.label}</InputLabel>
+                                                                        <Select
+                                                                            labelId="demo-simple-select-outlined-label"
+                                                                            id="demo-simple-select-outlined"
+                                                                            label={item.label}
+                                                                            onChange={(event) => {
+                                                                                setComp(event.target.value);
+                                                                                handleChange(event);
+                                                                            }}
+                                                                            onBlur={handleBlur}
+                                                                            value={values.companyId}
+                                                                            name="companyId"
+                                                                        >
+                                                                            {companies.map((entrepreneur) => (
+                                                                                <MenuItem key={companies._id} value={companies._id}>
+                                                                                    {companies.pitchTitle}
+                                                                                </MenuItem>
+                                                                            ))}
+                                                                        </Select>
+                                                                    </FormControl>
+                                                                </Grid>
+                                                            )}
+
                                                         </FormControl>
                                                     </Grid>
                                                 ))}

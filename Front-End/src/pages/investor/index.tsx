@@ -24,7 +24,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
 import UserForm from '@/components/form';
-import { companyProfile, investorSchema } from '@/layout/user-data';
+import { investorSchema } from '@/layout/user-data';
 import { Button } from '@mui/material';
 import APIs from '@/utils/api-handler';
 import Dialog from '@mui/material/Dialog';
@@ -186,7 +186,6 @@ const headCells: readonly HeadCell[] = [
   },
   {
     id: 'createdAt',
-
     numeric: false,
     disablePadding: false,
     label: 'Created Date',
@@ -617,8 +616,4 @@ const Investor = () => {
     </>
   );
 }
-
-
-
-
 export default Investor;

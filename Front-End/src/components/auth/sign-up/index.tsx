@@ -1,10 +1,8 @@
 import { Button, IconButton, InputAdornment, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Apple } from '@mui/icons-material';
-import FacebookOutlinedIcon from '@mui/icons-material/FacebookOutlined';
 import { useRouter } from 'next/router';
 import SignIn from '../sign-in';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -44,14 +42,22 @@ const SignUp = () => {
 
   const handleSignUp = async (e: any) => {
     e.preventDefault();
-    // const { fullName, email, password } = e.target.elements;
-
+     // Full Name validation logic
+  if (!fullName || fullName.length < 3 || /\s/.test(fullName)) {
+    toast.error('Full Name must be at least 3 characters long and should not contain spaces.');
+    return;
+  }
+    // Password validation logic
+    if (!password || password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[!@#$%^&*()]/.test(password) || !/[0-9]/.test(password)) {
+      toast.error('Password must be at least 8 characters long, include lowercase, an uppercase letter, special characters, and a number.');
+      return;
+    }
     // Constructing the data object
     const data = {
       fullName: fullName,
       email: email,
       password: password,
-      role: role, // The role selected from the dropdown
+      role: role,
     };
     const headers = {
       'Content-Type': 'Application/json'
@@ -63,20 +69,14 @@ const SignUp = () => {
     if (apiResponse?.status === 201) {
       const getToken = apiResponse?.data?.data?.token;
       console.log('gettoken', getToken, apiResponse.data.token);
-      // localStorage.setItem('token', getToken);
       toast.success(apiResponse?.data?.message);
-      // setToken(getToken);
       setTimeout(() => {
         setRenderLoginPage(true);
       }, 2000);
-      // router.push('/auth/login');
     }
     else {
       toast.error('Something went wrong ! Try Again.');
     }
-
-    // Optionally, redirect after signup
-    // router.push("/auth/login");
   };
 
   const handleBack = (e: any) => {

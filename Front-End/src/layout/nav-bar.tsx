@@ -14,8 +14,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { navItems } from './menu-items/menu-items';
-import ProfileModal from '@/components/modal';
-import DataTable from '@/pages/investor';
 import UserForm from '@/components/form';
 import { adminSchema, entrepreneurSchema, investorSchema } from "./user-data/index";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -132,12 +130,8 @@ const Navbar: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // setAnchorEl(null);
-        // handleMobileMenuClose();
         setAnchorEl(null);
         setOpen(true);
-
-        // router.push("/sign-in");
     }
 
     const menuId = 'primary-search-account-menu';
@@ -282,17 +276,16 @@ const Navbar: React.FC = () => {
                 <div className="px-6 w-full">
                     <div className="lg:flex lg:items-center lg:justify-between">
                         {/* nav-logo */}
-                        <div className="flex items-center justify-between ">
                             <Link href="/">
-                                <Image
+                                <img
                                     src={"/Logo.svg"}
                                     alt="Logo"
-                                    width={65}
+                                    width={120}
                                     height={50}
-                                    className='mb-2'
+                                    className='mb-2 absolute top-[-27px]'
                                 />
                             </Link>
-                            <h2 className='text-xl font-bold tracking-wider mt-'>PITCH CONNECT</h2>
+                        <div className="flex items-center justify-between ">
                             {/* Mobile menu button */}
                             <div className="flex lg:hidden">
                                 <button

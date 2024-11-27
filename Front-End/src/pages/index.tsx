@@ -5,7 +5,6 @@ import HeroSection from "../components/hero";
 export default function Home() {
   const [isLogin, setIsLogin] = useState<string | null>(null);
   useEffect(() => {
-    // Check localStorage only on the client side
     const loginStatus = localStorage.getItem("login");
     setIsLogin(loginStatus);
   }, []);
