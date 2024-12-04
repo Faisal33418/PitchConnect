@@ -29,6 +29,11 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/entrepreneur.js"
     ],
+    "/entrepreneur-business": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/entrepreneur-business.js"
+    ],
     "/find-entrepreneurs": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -38,6 +43,11 @@ self.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/investor.js"
+    ],
+    "/signup": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/signup.js"
     ]
   },
   "ampFirstPages": []
