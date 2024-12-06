@@ -3,9 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/signup": "pages/signup.js",
-  "/entrepreneur-business": "pages/entrepreneur-business.js",
-  "/entrepreneur": "pages/entrepreneur.js",
-  "/find-entrepreneurs": "pages/find-entrepreneurs.js",
-  "/investor": "pages/investor.js"
+  "/signup": "pages/signup.js"
 }
