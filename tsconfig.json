@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/pages/appointment/book/index.tsx",
+    "src/components/charts/line-charts.tsx",
+    "src/components/charts/test.tsx",
+    "src/components/charts/dd.tsx",
+    "src/components/charts/bar-chart.tsx",
+    "src/pages/patient/profile",
+    "src/components/appointment/date-picker.jsx",
+    "src/pages/appointment/calendar/google-calendar.js",
+    "src/pages/home/enterpreneurs.tsx",
+    "src/pages/investor/index.tsx",
+    "src/pages/home/landing.tsx",
+    "src/components/auth/sign-up/index.tsx",
+    "src/components/form/index.jsx",
+    "src/components/form/index.jsx"
+  ],
+  "exclude": ["node_modules"]
+}
