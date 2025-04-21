@@ -100,7 +100,7 @@ const MenuItems = [
         className="sidebar-icons"
       />
     ),
-    link: "/#communication",
+    link: "/chat/admin",
   },
 ];
 const AdminItems = [
