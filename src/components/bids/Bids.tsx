@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import { NotificationAdd } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import axios from "axios";
+import { ThreeCircles } from "react-loader-spinner";
 
 export default function Bids() {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
@@ -21,7 +22,7 @@ export default function Bids() {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-
+  const [loading, setLoading] = React.useState(false);
   const [investor, setInvestor] = React.useState();
   const [bid, setBid] = React.useState("");
   const getUser = JSON.parse(localStorage.getItem("user"));
@@ -36,16 +37,40 @@ export default function Bids() {
 
   React.useEffect(() => {
     const getUser = JSON.parse(localStorage.getItem("user"));
-    if (getUser?.role == "Entrepreneur") {
+    if (getUser != null && getUser?.role == "Entrepreneur") {
       getBids();
     }
   }, []);
 
+  const acceptBid = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `http://localhost:8080/api/v1/pconnect-app/entrepreneur/accept-bid/${getUser?._id}`,
+        {
+          investor_id: investor._id,
+        }
+      );
+
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div>
-      <IconButton aria-describedby={id} variant="" onClick={handleClick}>
-        <NotificationAdd />
-      </IconButton>
+      {getUser && (
+        <>
+          {investor && Object.keys(investor).length > 0 && (
+            <IconButton aria-describedby={id} variant="" onClick={handleClick}>
+              <NotificationAdd />
+            </IconButton>
+          )}
+        </>
+      )}
+
       <Popover
         id={id}
         open={open}
@@ -125,8 +150,25 @@ export default function Bids() {
           </div>
         </div>
         <div className="p-4">
-          <Button variant="contained" sx={{ margin: "1rem 0", width: "100%" }}>
-            Accept Bid
+          <Button
+            onClick={acceptBid}
+            variant="contained"
+            sx={{
+              margin: "1rem 0",
+              width: "100%",
+              background: `${loading ? "bg-gray-500" : ""}`,
+            }}
+          >
+            {loading ? (
+              <ThreeCircles
+                height={30}
+                width={30}
+                color="black"
+                wrapperClass="flex justify-center"
+              />
+            ) : (
+              "Accept Bid"
+            )}
           </Button>
         </div>
       </Popover>
