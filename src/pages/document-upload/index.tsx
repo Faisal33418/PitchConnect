@@ -588,54 +588,54 @@ const DocumentUpload = ({ searchingTxt = null }) => {
     getCompanies();
   }, []);
 
-  React.useEffect(() => {
-    const fetchDocuments = async () => {
-      const token = localStorage.getItem("token");
-      let getUser = localStorage.getItem("user");
-      getUser = JSON.parse(getUser);
-      // fetch documents based on USER-ROLE
-      const endPoint =
-          getUser?.role === "Admin"
-            ? "documents/entrepreneur-documents"
-            : `documents/entrepreneur-documents/${getUser?._id}`,
-        id = null,
-        method = "GET",
-        headers = {
-          Authorization: `Bearer ${token}`,
-        },
-        reqData = null;
+  const fetchDocuments = async () => {
+    const token = localStorage.getItem("token");
+    let getUser = localStorage.getItem("user");
+    getUser = JSON.parse(getUser);
+    // fetch documents based on USER-ROLE
+    const endPoint =
+        getUser?.role === "Admin"
+          ? "documents/entrepreneur-documents"
+          : `documents/entrepreneur-documents/${getUser?._id}`,
+      id = null,
+      method = "GET",
+      headers = {
+        Authorization: `Bearer ${token}`,
+      },
+      reqData = null;
 
-      const apiResponse = await APIs(
-        endPoint,
-        id,
-        method,
-        headers,
-        reqData,
-        false
-      );
-      if (apiResponse?.status === 200) {
-        let requireData = null;
-        if (getUser?.role === "Entrepreneur") {
-          requireData = apiResponse?.data?.data;
-          if (searchingTxt) {
-            requireData = requireData.filter(
-              (company) => company?.pitchTitle === searchingTxt
-            );
-          }
-          setRows(requireData);
-        } else if (getUser?.role === "Admin") {
-          requireData = apiResponse?.data?.data;
-          if (searchingTxt) {
-            requireData = requireData.filter(
-              (company) =>
-                company?.pitchTitle === searchingTxt ||
-                company?.entrepreneurEmail === searchingTxt
-            );
-          }
-          setRows(requireData);
+    const apiResponse = await APIs(
+      endPoint,
+      id,
+      method,
+      headers,
+      reqData,
+      false
+    );
+    if (apiResponse?.status === 200) {
+      let requireData = null;
+      if (getUser?.role === "Entrepreneur") {
+        requireData = apiResponse?.data?.data;
+        if (searchingTxt) {
+          requireData = requireData.filter(
+            (company) => company?.pitchTitle === searchingTxt
+          );
         }
+        setRows(requireData);
+      } else if (getUser?.role === "Admin") {
+        requireData = apiResponse?.data?.data;
+        if (searchingTxt) {
+          requireData = requireData.filter(
+            (company) =>
+              company?.pitchTitle === searchingTxt ||
+              company?.entrepreneurEmail === searchingTxt
+          );
+        }
+        setRows(requireData);
       }
-    };
+    }
+  };
+  React.useEffect(() => {
     fetchDocuments();
   }, [searchingTxt, refresh]);
 
@@ -851,12 +851,16 @@ const DocumentUpload = ({ searchingTxt = null }) => {
       )}
 
       {/* Document Table Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-6 relative">
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2 text-center">
             Business Documents
           </h2>
-          <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
+          <div className="absolute top-3 right-3">
+            <IconButton onClick={fetchDocuments}>
+              <RefreshIcon />
+            </IconButton>
+          </div>
         </div>
 
         <Paper
