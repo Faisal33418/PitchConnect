@@ -150,7 +150,7 @@ const headCells: readonly HeadCell[] = [
     id: "previousRoundRaise",
     numeric: true,
     disablePadding: false,
-    label: "previous  Round Raise",
+    label: "previous Round Raise",
   },
 ];
 
@@ -487,56 +487,58 @@ const CompanyInfo = ({ searchingTxt = null }) => {
     getActiveUser();
   }, []);
 
-  React.useEffect(() => {
-    const fetchCompanies = async () => {
-      const token = localStorage.getItem("token");
-      let getUser = localStorage.getItem("user");
-      getUser = JSON.parse(getUser);
+  // fetch companies funtion
+  const fetchCompanies = async () => {
+    const token = localStorage.getItem("token");
+    let getUser = localStorage.getItem("user");
+    getUser = JSON.parse(getUser);
 
-      const endPoint = "company",
-        id = null,
-        method = "GET",
-        headers = {
-          Authorization: `Bearer ${token}`,
-        },
-        reqData = null;
+    const endPoint = "company",
+      id = null,
+      method = "GET",
+      headers = {
+        Authorization: `Bearer ${token}`,
+      },
+      reqData = null;
 
-      const apiResponse = await APIs(
-        endPoint,
-        id,
-        method,
-        headers,
-        reqData,
-        false
-      );
+    const apiResponse = await APIs(
+      endPoint,
+      id,
+      method,
+      headers,
+      reqData,
+      false
+    );
 
-      if (apiResponse?.status === 200) {
-        let requireData = null;
-        // show specific data for entrepreneur
-        if (getUser?.role === "Entrepreneur") {
-          requireData = apiResponse?.data?.data;
-          let entrepreneurData = requireData.filter(
-            (company) => company?.entrepreneurId?._id === getUser?._id
+    if (apiResponse?.status === 200) {
+      let requireData = null;
+      // show specific data for entrepreneur
+      if (getUser?.role === "Entrepreneur") {
+        requireData = apiResponse?.data?.data;
+        let entrepreneurData = requireData.filter(
+          (company) => company?.entrepreneurId?._id === getUser?._id
+        );
+        if (searchingTxt) {
+          entrepreneurData = entrepreneurData.filter(
+            (company) => company?.pitchTitle === searchingTxt
           );
-          if (searchingTxt) {
-            entrepreneurData = entrepreneurData.filter(
-              (company) => company?.pitchTitle === searchingTxt
-            );
-          }
-          setRows(entrepreneurData);
-        } else if (getUser?.role === "Admin") {
-          requireData = apiResponse?.data?.data;
-          if (searchingTxt) {
-            requireData = requireData.filter(
-              (company) =>
-                company?.pitchTitle === searchingTxt ||
-                company?.entrepreneurId?.email === searchingTxt
-            );
-          }
-          setRows(requireData);
         }
+        setRows(entrepreneurData);
+      } else if (getUser?.role === "Admin") {
+        requireData = apiResponse?.data?.data;
+        if (searchingTxt) {
+          requireData = requireData.filter(
+            (company) =>
+              company?.pitchTitle === searchingTxt ||
+              company?.entrepreneurId?.email === searchingTxt
+          );
+        }
+        setRows(requireData);
       }
-    };
+    }
+  };
+
+  React.useEffect(() => {
     fetchCompanies();
 
     const fetchEntrepreneurs = async () => {
@@ -581,17 +583,24 @@ const CompanyInfo = ({ searchingTxt = null }) => {
       <DialogBox />
       <Toaster />
       {activeUser?.role !== "Admin" && (
-        <IconButton sx={{ marginLeft: "auto", display: "block" }}>
-          <Button
-            variant="contained"
-            sx={{
-              textTransform: "capitalize",
-            }}
-            onClick={handleRegister}
-          >
-            Register
-          </Button>
-        </IconButton>
+        <>
+          <div className="flex gap-5">
+            <IconButton sx={{ marginLeft: "auto", display: "block" }}>
+              <Button
+                variant="contained"
+                sx={{
+                  textTransform: "capitalize",
+                }}
+                onClick={handleRegister}
+              >
+                Register
+              </Button>
+            </IconButton>
+            <IconButton onClick={fetchCompanies}>
+              <RefreshIcon />
+            </IconButton>
+          </div>
+        </>
       )}
       <Box sx={{ width: "100%", p: 3 }}>
         <h2 className="border-b text-3xl text-center text-gray-700 font-semibold pb-6">
