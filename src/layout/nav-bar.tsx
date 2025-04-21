@@ -38,6 +38,7 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { NotificationsOutlined } from "@mui/icons-material";
 import Bids from "@/components/bids/Bids";
+import MyMessages from "@/components/messages/MyMessages";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -316,6 +317,8 @@ const Navbar: React.FC = () => {
     fetchApprovalUsers();
   }, [refresh]);
 
+  let myUser = JSON.parse(localStorage.getItem("user"));
+
   let user = localStorage.getItem("user");
   user = JSON.parse(user);
   user = user?.profilePicture;
@@ -327,7 +330,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="flex bg-gradient-to-r text-black from-green-500 items-center sticky to-emerald-600 top-0 via-teal-500 z-10">
+    <div className="flex  text-black  items-center sticky  top-0 z-50 bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] ">
       <nav
         className={`p-5 w-full  border-b-[#E5E9EB] ${token ? "" : ""}`}
         style={{ backgroundColor: token ? bgColor || "" : "" }} // Use bgColor state here
@@ -405,6 +408,8 @@ const Navbar: React.FC = () => {
                           />
                         </div>
                       )}
+                      {myUser?.role == "Admin" || !myUser ? "" : <MyMessages />}
+
                       <Bids />
                     </div>
                   </ul>
