@@ -150,19 +150,37 @@ const SignUp = () => {
   return (
     <>
       <Toaster />
-      <div className="h-[89vh] bg-gradient-to-r from-green-500 via-teal-500 to-emerald-600 flex items-center justify-center  p-4 overflow-hidden relative">
+      <div className="h-[88vh] bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] flex items-center justify-center p-4 overflow-hidden relative">
         {/* Animated Blobs */}
-        <div className="absolute w-full h-full top-0 left-0 pointer-events-none">
-          <div className="blob blob-1 animate-blob-1"></div>
-          <div className="blob blob-2 animate-blob-2"></div>
-          <div className="blob blob-3 animate-blob-3"></div>
-          <div className="blob blob-4 animate-blob-4"></div>
-          <div className="blob blob-5 animate-blob-5"></div>
-          <div className="blob blob-6 animate-blob-6"></div>
-          <div className="blob blob-7 animate-blob-7"></div>
-          <div className="blob blob-8 animate-blob-8"></div>
-          <div className="blob blob-9 animate-blob-9"></div>
-          <div className="blob blob-10 animate-blob-10"></div>
+        <div className="absolute w-full h-full top-0 left-0 pointer-events-none overflow-hidden">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={i}
+              className={`blob blob-${i + 1}`}
+              style={{
+                position: "absolute",
+                width: `${Math.random() * 200 + 100}px`,
+                height: `${Math.random() * 200 + 100}px`,
+                background: `radial-gradient(circle, ${
+                  i % 2 === 0 ? "#B384BD" : "#0A21C0"
+                }, transparent 70%)`,
+                borderRadius: "50%",
+                filter: "blur(40px)",
+                opacity: 0.7,
+                zIndex: 1,
+                transform: `translate(${Math.random() * 100}vw, ${
+                  Math.random() * 100
+                }vh)`,
+                animation: `float ${
+                  8 + Math.random() * 10
+                }s ease-in-out infinite, 
+                   pulse ${
+                     5 + Math.random() * 5
+                   }s ease-in-out infinite alternate`,
+                animationDelay: `${Math.random() * 5}s`,
+              }}
+            />
+          ))}
         </div>
 
         {/* Form Container */}
@@ -319,146 +337,39 @@ const SignUp = () => {
       </div>
 
       {/* Add this CSS for blobs */}
-      <style jsx>{`
-        .blob {
-          position: absolute;
-          width: 200px;
-          height: 200px;
-          background: linear-gradient(45deg, #4094f7, #9b59b6);
-          border-radius: 50%;
-          filter: blur(5px);
-          opacity: 0.3;
-          z-index: 1;
-          animation: float 8s ease-in-out infinite, colorChange 10s infinite,
-            morph 12s infinite;
-        }
-
-        .blob-1 {
-          top: 6%;
-          left: 4%;
-        }
-        .blob-2 {
-          top: 5%;
-          left: 70%;
-        }
-        .blob-3 {
-          top: 50%;
-          left: 10%;
-        }
-        .blob-4 {
-          top: 60%;
-          left: 80%;
-        }
-        .blob-5 {
-          top: 30%;
-          left: 40%;
-        }
-        .blob-6 {
-          top: 80%;
-          left: 90%;
-        }
-        .blob-7 {
-          top: 10%;
-          left: 50%;
-        }
-        .blob-8 {
-          top: 70%;
-          left: 60%;
-        }
-        .blob-9 {
-          top: 40%;
-          left: 90%;
-        }
-        .blob-10 {
-          top: 90%;
-          left: 20%;
-        }
-
+      <style jsx global>{`
         @keyframes float {
           0%,
           100% {
-            transform: translateY(0);
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(5vw, -5vh);
           }
           50% {
-            transform: translateY(-20px);
+            transform: translate(10vw, 0);
+          }
+          75% {
+            transform: translate(5vw, 5vh);
           }
         }
 
-        @keyframes colorChange {
+        @keyframes pulse {
           0% {
-            background: linear-gradient(45deg, #4094f7, #9b59b6);
-          }
-          25% {
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-          }
-          50% {
-            background: linear-gradient(45deg, #a18cd1, #fbc2eb);
-          }
-          75% {
-            background: linear-gradient(45deg, #fbc2eb, #a6c1ee);
+            opacity: 0.3;
+            transform: scale(0.8);
           }
           100% {
-            background: linear-gradient(45deg, #4094f7, #9b59b6);
+            opacity: 0.7;
+            transform: scale(1.2);
           }
         }
 
-        @keyframes morph {
-          0%,
-          100% {
-            border-radius: 50% 50% 60% 40% / 60% 50% 50% 40%;
-          }
-          25% {
-            border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
-          }
-          50% {
-            border-radius: 60% 40% 50% 50% / 40% 60% 50% 50%;
-          }
-          75% {
-            border-radius: 50% 50% 40% 60% / 50% 50% 60% 40%;
-          }
-        }
-
-        .animate-blob-1 {
-          animation: float 8s ease-in-out infinite, colorChange 10s infinite,
-            morph 12s infinite;
-        }
-
-        .animate-blob-2 {
-          animation: float 10s ease-in-out infinite, colorChange 12s infinite,
-            morph 14s infinite;
-        }
-
-        .animate-blob-3 {
-          animation: float 12s ease-in-out infinite, colorChange 14s infinite,
-            morph 16s infinite;
-        }
-        .animate-blob-4 {
-          animation: float 8s ease-in-out infinite, colorChange 10s infinite,
-            morph 12s infinite;
-        }
-
-        .animate-blob-5 {
-          animation: float 10s ease-in-out infinite, colorChange 12s infinite,
-            morph 14s infinite;
-        }
-
-        .animate-blob-6 {
-          animation: float 12s ease-in-out infinite, colorChange 14s infinite,
-            morph 16s infinite;
-        }
-        .animate-blob-7 {
-          animation: float 8s ease-in-out infinite, colorChange 10s infinite,
-            morph 12s infinite;
-        }
-
-        .animate-blob-8 {
-          animation: float 10s ease-in-out infinite, colorChange 12s infinite,
-            morph 14s infinite;
-        }
-
-        .animate-blob-9 {
-          animation: float 12s ease-in-out infinite, colorChange 14s infinite,
-            morph 16s infinite;
+        .blob:hover {
+          opacity: 0.9 !important;
+          filter: blur(30px) brightness(1.2) !important;
+          transform: scale(1.3) !important;
+          transition: all 0.3s ease;
         }
       `}</style>
     </>
