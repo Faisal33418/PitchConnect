@@ -20,7 +20,7 @@ const HeroSection = () => {
     <>
       {/* Admin Section */}
       {user?.role === "Admin" ? (
-        <section className="bg-gradient-to-r text-white from-blue-600 overflow-hidden py-32 relative to-indigo-700 via-purple-600">
+        <section className=" text-white bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] overflow-hidden py-32 relative ">
           {/* Animated Shapes */}
           <div className="h-full w-full absolute left-0 overflow-hidden top-0">
             <div className="bg-purple-500 h-64 rounded-full w-64 -left-16 -top-16 absolute animate-float opacity-20"></div>
@@ -42,7 +42,7 @@ const HeroSection = () => {
         </section>
       ) : (
         /* User Section */
-        <section className="bg-gradient-to-r text-white from-green-500 overflow-hidden py-32 relative to-emerald-600 via-teal-500">
+        <section className=" text-white  overflow-hidden py-32 relative bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44]">
           {/* Animated Shapes */}
           <div className="h-full w-full absolute left-0 overflow-hidden top-0">
             <div className="bg-teal-400 h-64 rounded-full w-64 -left-16 -top-16 absolute animate-float opacity-20"></div>
@@ -75,19 +75,26 @@ const HeroSection = () => {
                 </>
               )}
               <div className="flex justify-center space-x-4">
-                <Link
-                  href={
-                    user?.role === "Entrepreneur"
-                      ? "/entrepreneur-business"
-                      : user?.role === "Investor"
-                      ? "/find-entrepreneurs"
-                      : "/entrepreneur-business"
-                  }
-                >
-                  <button className="bg-white rounded-lg shadow-lg text-green-600 duration-300 hover:bg-gray-100 hover:shadow-xl px-6 py-3 transition-all">
-                    Start Your Journey
-                  </button>
-                </Link>
+                {user?.status == "pending" ? (
+                  <></>
+                ) : (
+                  <>
+                    <Link
+                      href={
+                        user?.role === "Entrepreneur"
+                          ? "/entrepreneur-business"
+                          : user?.role === "Investor"
+                          ? "/find-entrepreneurs"
+                          : "/entrepreneur-business"
+                      }
+                    >
+                      <button className="bg-white rounded-lg shadow-lg text-green-600 duration-300 hover:bg-gray-100 hover:shadow-xl px-6 py-3 transition-all">
+                        Start Your Journey
+                      </button>
+                    </Link>
+                  </>
+                )}
+
                 {/* Bell Icon for Approval Message */}
                 <div className="relative">
                   <button
