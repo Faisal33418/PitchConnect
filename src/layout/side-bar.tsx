@@ -64,7 +64,7 @@ const SideBar = () => {
   return (
     <div className="">
       <Toaster />
-      <div className="sticky top-0 h-[calc(100vh-65px)]">
+      <div className="sticky top-0  h-[calc(100vh-65px)]">
         {/* Sidebar container */}
         <aside
           className={`border transition-all duration-300 ease-in-out ${
@@ -262,7 +262,7 @@ const SideBar = () => {
 
         {/* Sidebar toggle button */}
         <button
-          className="fixed top-[69px] left-3 transition"
+          className="fixed top-[85px]  left-3 transition"
           onClick={toggleSidebar}
         >
           {isSidebarOpen ? <ArrowCircleLeftIcon /> : <ArrowCircleRightIcon />}
