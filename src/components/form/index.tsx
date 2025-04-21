@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import toast, { Toaster } from "react-hot-toast";
 import { AddCircleOutline, AddOutlined } from "@mui/icons-material";
+import { usePathname } from "next/navigation";
 
 const UserForm = ({
   title,
@@ -50,6 +51,9 @@ const UserForm = ({
   const [role, setRole] = useState(false);
   const [phone, setPhone] = React.useState(false);
   const [hideEntre, setHideEntre] = React.useState(false);
+
+  const pathname = usePathname();
+  console.log(pathname);
 
   const useStyles = makeStyles((theme) => ({
     modal: {
@@ -715,7 +719,7 @@ const UserForm = ({
     let user = null;
     if (fields[0].name !== "pitchTitle") {
       user = JSON.parse(localStorage.getItem("user") || "{}");
-    } else if (fields[0].name === "pitchTitle") {
+    } else if (fields[0]?.name === "pitchTitle") {
       const company = localStorage.getItem("action");
       if (company === "company update") {
         user = data;
@@ -817,7 +821,7 @@ const UserForm = ({
       >
         <div className={classes.card}>
           <Card className="border relative border-10 bg-black">
-            <div className="p-10 bg-gradient-to-r from-green-500 via-teal-500 to-emerald-600 text-white text-center text-2xl font-semibold">
+            <div className="p-10  bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] text-white text-center text-2xl font-semibold">
               {myUser?.role == "Entrepreneur" && "Entrepreneur Profile"}
               {myUser?.role == "Admin" && "Admin Profile"}
               {myUser?.role == "Investor" && "Investor Profile"}
@@ -890,9 +894,16 @@ const UserForm = ({
                                     const value = event.target.value;
                                     const cleanedValue =
                                       item.name === "phoneNumber" ||
-                                      item.name === "location"
-                                        ? value.replace(/[^a-zA-Z0-9\s]/g, "") // Removes special characters only
-                                        : value.replace(/[^a-zA-Z\s]/g, ""); // Keeps letters & spaces only for other fields
+                                      item.name === "location" ||
+                                      item.name === "investmentRange" ||
+                                      item.name === "investmentAmountRange" ||
+                                      item.name === "investmentHistory" ||
+                                      item.name === "previousRoundRaise" // removed 'website' from here
+                                        ? value.replace(/[^a-zA-Z0-9\s]/g, "") // Removes special characters
+                                        : item.name === "website"
+                                        ? value // Allow all characters for website
+                                        : value.replace(/[^a-zA-Z\s]/g, ""); // Letters and spaces only
+
                                     handleChange({
                                       target: {
                                         name: item.name,
@@ -1158,22 +1169,23 @@ const UserForm = ({
                       >
                         Save
                       </Button>
-                      {role !== "Admin" && (
-                        <Button
-                          disabled={
-                            !(
-                              localStorage.getItem("authID") &&
-                              role !== "Admin" &&
-                              phone
-                            )
-                          }
-                          variant="contained"
-                          color="primary"
-                          onClick={handleRequestApproval}
-                        >
-                          Request Approval
-                        </Button>
-                      )}
+                      {role !== "Admin" &&
+                        !fields.some((field) => field.name === "stage") && (
+                          <Button
+                            disabled={
+                              !(
+                                localStorage.getItem("authID") &&
+                                role !== "Admin" &&
+                                phone
+                              )
+                            }
+                            variant="contained"
+                            color="primary"
+                            onClick={handleRequestApproval}
+                          >
+                            Request Approval
+                          </Button>
+                        )}
                     </CardActions>
                   </Form>
                 )}
