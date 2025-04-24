@@ -5,6 +5,7 @@ import { Modal } from "@mui/material"; // Modal from MUI
 import moment from "moment";
 import axios from "axios";
 import BidModal from "./BidModal";
+import ChatModel from "./ChatModel";
 
 const CountdownTimer = ({ featureTime, entrepreneurId }) => {
   const calculateTimeLeft = () => {
@@ -93,6 +94,36 @@ const FindEntrepreneurs = () => {
     fetchEntrepreneurs();
   }, []);
 
+  useEffect(() => {
+    console.log("useEffect triggered"); // Log to check if the effect runs
+
+    const sendMail = async () => {
+      console.log("Attempting to send mail..."); // Debugging log
+      try {
+        const response = await axios.post(
+          "http://localhost:8080/api/v1/pconnect-app/entrepreneur/send-mail"
+        );
+        console.log("Feature removed successfully:", response.data);
+      } catch (error) {
+        console.error("Failed to remove feature:", error);
+      }
+    };
+    const removeIdea = async () => {
+      console.log("Attempting to send mail..."); // Debugging log
+      try {
+        const response = await axios.post(
+          "http://localhost:8080/api/v1/pconnect-app/entrepreneur/delete-idea"
+        );
+        console.log("Deleting Idea", response.data);
+      } catch (error) {
+        console.error("Failed to delete:", error);
+      }
+    };
+
+    sendMail();
+    removeIdea();
+  }, []);
+
   const filteredCompanies = entrepreneurs
     .flatMap((entrepreneur) =>
       entrepreneur.companies.map((company) => ({
@@ -111,6 +142,8 @@ const FindEntrepreneurs = () => {
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   return (
     <div className="container mx-auto px-6 py-10">
@@ -136,7 +169,8 @@ const FindEntrepreneurs = () => {
             key={company._id}
             className="bg-white p-6 rounded-lg shadow-md relative"
           >
-            {entrepreneurs[index].featured ? (
+            {entrepreneurs[index]?.featured &&
+            entrepreneurs[index]?.featured !== undefined ? (
               <div className="flex w-max ☻2 items-center ms-auto">
                 <Star
                   sx={{
@@ -205,17 +239,31 @@ const FindEntrepreneurs = () => {
                       Read More <PlayCircleOutline className="ml-2" />
                     </div>
                   </div>
-                  {entrepreneurs[index].featured ? (
+                  {entrepreneurs[index]?.featured &&
+                  entrepreneurs[index]?.featured !== undefined ? (
                     <CountdownTimer
-                      featureTime={entrepreneurs[index].featureTime}
-                      entrepreneurId={entrepreneurs[index]._id} // Pass entrepreneur ID
+                      featureTime={entrepreneurs[index]?.featureTime}
+                      entrepreneurId={entrepreneurs[index]?._id} // Pass entrepreneur ID
                     />
                   ) : (
                     ""
                   )}
                 </div>
               </button>
-              <BidModal id={entrepreneurs[index]._id} />
+              <div className="flex items-center my-2 gap-2">
+                {JSON.parse(localStorage.getItem("user"))?.role !== "Admin" && (
+                  <BidModal id={entrepreneurs[index]?._id} />
+                )}
+
+                {JSON.parse(localStorage.getItem("user"))?.role !== "Admin" &&
+                  entrepreneurs[index]?.bid?.investor === user?._id && (
+                    <ChatModel
+                      receiver={entrepreneurs[index]?._id}
+                      name={entrepreneurs[index]?.fullName}
+                      image={entrepreneurs[index]?.profilePicture?.[0]}
+                    />
+                  )}
+              </div>
             </div>
           </div>
         ))}

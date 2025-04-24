@@ -31,10 +31,14 @@ export default function BidModel({ id }) {
   const [loading, setLoading] = React.useState(false);
   // get bid amount
   const getBidAmount = async () => {
-    const response = await axios.get(
-      `http://localhost:8080/api/v1/pconnect-app/entrepreneur/get-bid-amount/${id}`
-    );
-    setAmount(response.data);
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/pconnect-app/entrepreneur/get-bid-amount/${id}`
+      );
+      setAmount(response.data);
+    } catch (error) {
+      console.error("Error fetching bid amount:", error);
+    }
   };
 
   React.useEffect(() => {
@@ -78,7 +82,7 @@ export default function BidModel({ id }) {
       <Button
         onClick={handleOpen2}
         variant="contained"
-        sx={{ marginTop: "1rem" }}
+        // sx={{ marginTop: "1rem" }}
       >
         Bid
       </Button>
