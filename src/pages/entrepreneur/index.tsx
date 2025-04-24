@@ -332,11 +332,11 @@ const Entrepreneur = () => {
           </>
         ) : (
           <>
-            <Tooltip title="Filter list">
+            {/* <Tooltip title="Filter list">
               <IconButton>
                 <FilterListIcon />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </>
         )}
         <Tooltip title="Filter list">
@@ -500,7 +500,7 @@ const Entrepreneur = () => {
             <Table
               sx={{ minWidth: 750 }}
               aria-labelledby="tableTitle"
-              size={dense ? "small" : "medium"}
+              // size={dense ? "small" : "medium"}
             >
               <EnhancedTableHead
                 numSelected={selected.length}
@@ -527,13 +527,13 @@ const Entrepreneur = () => {
                       sx={{ cursor: "pointer" }}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox
+                        {/* <Checkbox
                           color="primary"
                           checked={isItemSelected}
                           inputProps={{
                             "aria-labelledby": labelId,
                           }}
-                        />
+                        /> */}
                       </TableCell>
                       <TableCell align="right" sx={{ textAlign: "start" }}>
                         {row.fullName}
@@ -572,9 +572,11 @@ const Entrepreneur = () => {
                 })}
                 {emptyRows > 0 && (
                   <TableRow
-                    style={{
-                      height: (dense ? 33 : 53) * emptyRows,
-                    }}
+                    style={
+                      {
+                        // height: (dense ? 33 : 53) * emptyRows,
+                      }
+                    }
                   >
                     <TableCell colSpan={6} />
                   </TableRow>
@@ -592,10 +594,10 @@ const Entrepreneur = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Paper>
-        <FormControlLabel
+        {/* <FormControlLabel
           control={<Switch checked={dense} onChange={handleChangeDense} />}
           label="Dense padding"
-        />
+        /> */}
       </Box>
       {isModalOpen && (
         <UserForm
