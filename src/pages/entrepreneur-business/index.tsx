@@ -67,7 +67,7 @@ const EntrepreneurBusiness = () => {
   };
 
   return (
-    <div className="w-full z-30 relative mx-auto p-10 pt-6 bg-gradient-to-r from-green-500 via-teal-500 to-emerald-600 min-h-screen">
+    <div className="w-full z-30 relative mx-auto p-10 pt-6  bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] min-h-screen">
       {/* Search Bar */}
       <form className="mb-10 z-10">
         <div className="flex flex-col max-w-md mx-auto">
