@@ -5,6 +5,7 @@ import Layout from "@/layout/layout";
 import SignIn from "@/components/auth/sign-in";
 import Loading from "@/components/loading";
 import HomePage from "./home";
+import { AppProvider } from "@/context/AppProvider";
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isLogin, setIsLogin] = useState<string | null>(null);
@@ -19,17 +20,17 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if (isLoading) {
     // Optionally return a loading spinner or empty content until localStorage is checked
-    return <Loading />
+    return <Loading />;
   }
 
-  return (
-    isLogin ? (
+  return isLogin ? (
+    <AppProvider>
       <Layout>
         <Component {...pageProps} />
       </Layout>
-    ) : (
-      <HomePage />
-      // <SignIn />
-    )
+    </AppProvider>
+  ) : (
+    <HomePage />
+    // <SignIn />
   );
 }
