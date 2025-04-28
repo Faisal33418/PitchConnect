@@ -1,3 +1,4 @@
+// Keep all your imports as-is
 import { useEffect, useState } from "react";
 import { Button, IconButton } from "@mui/material";
 import { Menu, Check, X } from "lucide-react";
@@ -5,10 +6,12 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import clsx from "clsx";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
+
+// Types unchanged
 interface User {
   _id: string;
   fullName: string;
-  // add other user properties as needed
 }
 
 interface Message {
@@ -29,40 +32,49 @@ export default function ChatModeration() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [usersData, setUsersData] = useState<Record<string, User>>({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getChats = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/chat/get-all-chats"
-    );
-    setChats(response.data);
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/chat/get-all-chats"
+      );
+      setChats(response.data);
 
-    // Pre-fetch user data for all chats
-    const userIds = new Set<string>();
-    response.data.forEach((chat: Chat) => {
-      userIds.add(chat.sender);
-      userIds.add(chat.receiver);
-    });
+      const userIds = new Set<string>();
+      response.data.forEach((chat: Chat) => {
+        userIds.add(chat.sender);
+        userIds.add(chat.receiver);
+      });
 
-    await Promise.all(
-      Array.from(userIds).map(async (userId) => {
-        if (!usersData[userId]) {
-          const userResponse = await axios.get(
-            `http://localhost:8080/api/chat/get-user-data/${userId}`
-          );
-          setUsersData((prev) => ({
-            ...prev,
-            [userId]: userResponse.data,
-          }));
-        }
-      })
-    );
+      await Promise.all(
+        Array.from(userIds).map(async (userId) => {
+          if (!usersData[userId]) {
+            const userResponse = await axios.get(
+              `http://localhost:8080/api/chat/get-user-data/${userId}`
+            );
+            setUsersData((prev) => ({ ...prev, [userId]: userResponse.data }));
+          }
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     getChats();
   }, []);
 
-  const myUser = JSON.parse(localStorage.getItem("user") || "null");
+  const filteredChats = chats.filter((chat) => {
+    const senderName = usersData[chat.sender]?.fullName || "Unknown Sender";
+    const receiverName =
+      usersData[chat.receiver]?.fullName || "Unknown Receiver";
+    return (
+      senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      receiverName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const handleModeration = async (
     chatId: string,
@@ -70,7 +82,6 @@ export default function ChatModeration() {
     status: string
   ) => {
     if (!selectedChat) return;
-
     try {
       await axios.post(
         `http://localhost:8080/api/chat/moderate-message/${chatId}`,
@@ -113,114 +124,155 @@ export default function ChatModeration() {
     getChats();
   };
 
-  const renderMessages = (senderType: string) =>
-    selectedChat?.chat
-      ?.filter((msg) => msg.senderType === senderType)
-      .map((msg) => (
+  const renderMessages = () =>
+    selectedChat?.chat.map((msg) => {
+      const isEntrepreneur = msg.senderType === "Entrepreneur";
+      return (
         <motion.div
           key={msg.id}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className={clsx(
-            "relative bg-white shadow-md p-3 rounded-md border-l-4 mb-4",
-            msg.status === "approved"
-              ? "border-green-500"
-              : msg.status === "rejected"
-              ? "border-red-500"
-              : "border-yellow-500"
+            "relative max-w-[80%] sm:max-w-[70%] rounded-xl p-3 my-3 shadow-md text-sm",
+            isEntrepreneur
+              ? "bg-white self-start ml-2"
+              : "bg-blue-500 text-white self-end mr-2"
           )}
         >
-          <p className="text-gray-800">{msg.message}</p>
-          <div className="absolute top-2 right-2 flex gap-1">
-            {msg.status === "pending" ? (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    handleModeration(selectedChat._id, msg.id, "approved")
-                  }
-                  className="text-green-600 hover:text-green-800"
+          <div className="font-bold text-xs mb-1">
+            {msg.senderType === "Entrepreneur" ? "Entrepreneur" : "Investor"}
+          </div>
+          <div className="flex gap-2 items-center">
+            <p className="mb-1 whitespace-pre-wrap break-words">
+              {msg.message}
+            </p>
+            <div className=" top-1 right-2 flex items-center space-x-1">
+              {msg.status === "pending" ? (
+                <>
+                  <IconButton
+                    sx={{ background: "white" }}
+                    size="small"
+                    onClick={() =>
+                      handleModeration(selectedChat._id, msg.id, "approved")
+                    }
+                  >
+                    <Check className="text-green-600" />
+                  </IconButton>
+                  <IconButton
+                    sx={{ background: "white" }}
+                    size="small"
+                    onClick={() =>
+                      handleModeration(selectedChat._id, msg.id, "rejected")
+                    }
+                  >
+                    <X className="text-red-600" />
+                  </IconButton>
+                </>
+              ) : (
+                <span
+                  className={clsx(
+                    "text-xs font-semibold",
+                    msg.status === "approved"
+                      ? "text-green-500"
+                      : "text-red-500"
+                  )}
                 >
-                  <Check />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    handleModeration(selectedChat._id, msg.id, "rejected")
-                  }
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <X />
-                </IconButton>
-              </>
-            ) : (
-              <span
-                className={clsx(
-                  "text-sm font-semibold",
-                  msg.status === "approved" ? "text-green-600" : "text-red-600"
-                )}
-              >
-                {msg.status === "approved" ? "Allowed" : "Disabled"}
-              </span>
-            )}
+                  {msg.status === "approved" ? "Allowed" : "Disabled"}
+                </span>
+              )}
+            </div>
           </div>
         </motion.div>
-      ));
+      );
+    });
 
   return (
-    <div className="relative w-full flex h-screen bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] overflow-hidden">
-      {/* Animated Blobs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-        <div className="absolute w-72 h-72 bg-purple-300 opacity-30 rounded-full top-10 left-10 animate-pulse" />
-        <div className="absolute w-96 h-96 bg-blue-300 opacity-30 rounded-full bottom-20 right-20 animate-pulse" />
-      </div>
-
+    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
       {/* Sidebar */}
-      <div className="relative w-1/4 bg-white shadow-lg p-4 border-r border-gray-300 z-10">
-        <h2 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
-          <div className="flex items-center justify-between w-full">
-            Message Requests
-            <RefreshIcon className="cursor-pointer" onClick={handleRefresh} />
+      <div className="w-1/4 min-w-[240px] bg-gradient-to-b from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d]text-white p-4 flex flex-col">
+        <div className="flex items-center mb-6">
+          <img
+            src="https://i.pravatar.cc/40"
+            alt="Avatar"
+            className="rounded-full w-10 h-10"
+          />
+          <span className="ml-3 text-lg font-semibold">Chat</span>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative mb-4">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <SearchIcon className="text-gray-500" />
           </div>
-        </h2>
-        <ul className="mt-4 space-y-2">
-          {chats?.map((chat) => (
-            <li
-              key={chat._id}
-              className={`p-2 rounded-lg cursor-pointer ${
-                selectedChat?._id === chat._id
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-              onClick={() => setSelectedChat(chat)}
-            >
-              <p>
-                {usersData[chat.sender]?.fullName || "Loading..."} ↔{" "}
-                {usersData[chat.receiver]?.fullName || "Loading..."}
-              </p>
-            </li>
-          ))}
-        </ul>
+          <input
+            type="text"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search chats..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2 flex-1 overflow-auto">
+          <h2 className="text-black font-bold text-md mb-2 flex justify-between items-center">
+            Messages
+            <RefreshIcon
+              className="cursor-pointer text-black"
+              onClick={handleRefresh}
+            />
+          </h2>
+          <ul className="space-y-1">
+            {filteredChats.length > 0 ? (
+              filteredChats.map((chat) => (
+                <li
+                  key={chat._id}
+                  onClick={() => setSelectedChat(chat)}
+                  className={clsx(
+                    "p-2 rounded-lg cursor-pointer hover:bg-white hover:text-black",
+                    selectedChat?._id === chat._id && "bg-white text-black"
+                  )}
+                >
+                  {usersData[chat.sender]?.fullName || "Loading..."} ↔{" "}
+                  {usersData[chat.receiver]?.fullName || "Loading..."}
+                </li>
+              ))
+            ) : (
+              <li className="p-2 text-gray-500">
+                {searchTerm ? "No matching chats found" : "No chats available"}
+              </li>
+            )}
+          </ul>
+        </div>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="relative w-3/4 flex gap-4 p-6 z-10">
-        {/* Entrepreneur Side */}
-        <div className="flex-1 bg-gradient-to-br from-teal-300 to-cyan-500 border-4 border-black rounded-lg p-4 overflow-auto">
-          <div className="bg-white border-2 border-black w-fit px-4 py-1 font-bold mb-4">
-            Entrepreneur
+      {/* Chat Area */}
+      <div className="flex-1 p-6 h-[80vh] overflow-y-scroll flex flex-col bg-white overflow-hidden w-full">
+        {selectedChat ? (
+          <>
+            <div className="text-xl font-bold mb-4 border-b pb-2">
+              {usersData[selectedChat.sender]?.fullName || "Sender"} &rarr;{" "}
+              {usersData[selectedChat.receiver]?.fullName || "Receiver"}
+            </div>
+            <div className="flex-1 overflow-y-auto flex flex-col space-y-2">
+              {renderMessages()}
+            </div>
+            <div className="mt-4">
+              <input
+                type="text"
+                className="w-full p-2 border rounded-md"
+                placeholder="Type a message..."
+                disabled
+              />
+            </div>
+          </>
+        ) : (
+          <div className="text-center text-gray-500 mt-20">
+            {searchTerm
+              ? "No chat selected from search results"
+              : "Select a chat to view messages"}
           </div>
-          {renderMessages("Entrepreneur")}
-        </div>
-
-        {/* Investor Side */}
-        <div className="flex-1 bg-gradient-to-br from-purple-300 to-blue-500 border-4 border-black rounded-lg p-4 overflow-auto">
-          <div className="bg-white border-2 border-black w-fit px-4 py-1 font-bold mb-4">
-            Investor
-          </div>
-          {renderMessages("Investor")}
-        </div>
+        )}
       </div>
     </div>
   );
