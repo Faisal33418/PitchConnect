@@ -7,7 +7,6 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import SportsBasketballIcon from "@mui/icons-material/SportsBasketball"; // Used as a placeholder for Dribbble
-import { YoutubeIcon } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
           <SideBar />
           {children}
         </div>
-        <footer className="relative bg-[#111827] pt-8 pb-6">
+        <footer className="mt-auto bottom-0 w-full bg-gradient-to-r from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d] pt-8 pb-6">
           <div
             className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20"
             style={{ height: "80px" }}
@@ -45,54 +44,54 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="container mx-auto px-14 pt-3">
             <div className="flex flex-wrap">
               <div className="w-full lg:w-6/12 px-4">
-                <h4 className="text-3xl font-semibold text-white">
+                <h4 className="text-3xl font-semibold text-black">
                   Keep in touch!
                 </h4>
-                <h5 className="text-lg mt-0 mb-2 text-white">
+                <h5 className="text-lg mt-0 mb-2 text-black">
                   We'are 24/7 services providing
                 </h5>
                 {/* media links */}
                 <div className="mt-6 flex gap-4">
-                  <a href="https://twitter.com">
-                    <TwitterIcon className="text-white" />
+                  <a href="https://www.twitter.com">
+                    <TwitterIcon className="text-black" />
                   </a>
-                  <a href="https://facebook.com">
-                    <FacebookIcon className="text-white" />
+                  <a href="https://www.facebook.com">
+                    <FacebookIcon className="text-black" />
                   </a>
-                  <a href="https://youtube.com">
-                    <YoutubeIcon  className="text-white" />
+                  <a href="https://www.dribble.com">
+                    <SportsBasketballIcon className="text-black" />
                   </a>
-                  <a href="https://github.com">
-                    <GitHubIcon className="text-white" />
+                  <a href="https://www.github.com">
+                    <GitHubIcon className="text-black" />
                   </a>
                 </div>
               </div>
               <div className="w-full lg:w-6/12 px-4">
                 <div className="flex flex-wrap items-top mb-6">
                   <div className="w-full lg:w-4/12 px-4 ml-auto">
-                    <span className="block uppercase text-white text-sm font-semibold mb-2">
+                    <span className="block uppercase text-black text-sm font-semibold mb-2">
                       Useful Links
                     </span>
                     <ul className="list-unstyled">
                       <li>
                         <a
-                          className="text-white hover:text-gray-900 font-semibold block pb-2 text-sm"
-                          href="http://localhost:3000/contact"
+                          className="text-black hover:text-gray-900 font-semibold block pb-2 text-sm"
+                          href="https://www.linkedin.com"
                         >
-                          About Us
+                          LinkedIn
                         </a>
                       </li>
                       <li>
                         <a
-                          className=" text-white font-semibold block pb-2 text-sm"
-                          href="https://blog.com"
+                          className=" text-black font-semibold block pb-2 text-sm"
+                          href="https://instagram.com"
                         >
-                          Blog
+                          Instagram
                         </a>
                       </li>
                       <li>
                         <a
-                          className="text-white font-semibold block pb-2 text-sm"
+                          className="text-black font-semibold block pb-2 text-sm"
                           href="https://www.github.com/"
                         >
                           Github
@@ -100,10 +99,10 @@ const Layout = ({ children }: LayoutProps) => {
                       </li>
                       <li>
                         <a
-                          className="text-white font-semibold block pb-2 text-sm"
-                          href="https://www.daraz.pk/"
+                          className="text-black font-semibold block pb-2 text-sm"
+                          href="https://www.twitter.com"
                         >
-                          Free Products
+                          Twitter
                         </a>
                       </li>
                     </ul>

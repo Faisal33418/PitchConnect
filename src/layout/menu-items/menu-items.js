@@ -2,6 +2,7 @@ import LightbulbCircleIcon from "@mui/icons-material/LightbulbCircle";
 import SocialDistanceIcon from "@mui/icons-material/SocialDistance";
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
+import { Gavel } from "@mui/icons-material";
 
 const navItems = [
   {
@@ -69,6 +70,12 @@ const MenuItems = [
     ),
     link: "/entrepreneur-business",
   },
+
+  {
+    title: "Contract",
+    icon: <Gavel fontSize="small" color="action" className="sidebar-icons" />,
+    link: "/docusign",
+  },
   {
     title: "Featured Ideas",
     icon: (
@@ -89,7 +96,7 @@ const MenuItems = [
         className="sidebar-icons"
       />
     ),
-    link: "/#social",
+    link: "/social-prosperity",
   },
   {
     title: "Interprated Communication",
