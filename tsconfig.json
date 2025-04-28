@@ -33,7 +33,8 @@
     "src/pages/home/landing.tsx",
     "src/components/auth/sign-up/index.tsx",
     "src/components/form/index.jsx",
-    "src/components/form/index.jsx"
+    "src/components/form/index.jsx",
+    "../server/server/docusignService.ts"
   ],
   "exclude": ["node_modules"]
 }
