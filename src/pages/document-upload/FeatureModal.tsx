@@ -19,7 +19,7 @@ const style = {
   p: 4,
 };
 
-export default function FeatureModal({ _id }) {
+export default function FeatureModal({ _id, videoFilled, setVideoFilled }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -44,7 +44,12 @@ export default function FeatureModal({ _id }) {
 
   return (
     <div>
-      <Button variant="contained" onClick={handleOpen}>
+      <Button
+        disabled={!videoFilled}
+        sx={{ background: `${!videoFilled ? "gray" : ""}` }}
+        variant="contained"
+        onClick={handleOpen}
+      >
         Feature
       </Button>
       <Modal
@@ -66,7 +71,12 @@ export default function FeatureModal({ _id }) {
           <Button
             onClick={featureIdea}
             variant="contained"
-            sx={{ display: "block", marginLeft: "auto", marginTop: "1rem" }}
+            sx={{
+              display: "block",
+
+              marginLeft: "auto",
+              marginTop: "1rem",
+            }}
           >
             Proceed to Payment
           </Button>

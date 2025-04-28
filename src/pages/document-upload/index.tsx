@@ -227,7 +227,11 @@ interface EnhancedTableToolbarProps {
   numSelected: number;
 }
 
-const DocumentUpload = ({ searchingTxt = null }) => {
+const DocumentUpload = ({
+  searchingTxt = null,
+  videoFilled,
+  setVideoFilled,
+}) => {
   const [logo, setLogo] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [order, setOrder] = useState<Order>("asc");
@@ -250,6 +254,7 @@ const DocumentUpload = ({ searchingTxt = null }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [companies, setCompanies] = useState([]);
   const [companyId, setCompanyId] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Handle checkbox state change
   const handleCheckboxChange = (event) => {
@@ -639,6 +644,12 @@ const DocumentUpload = ({ searchingTxt = null }) => {
     fetchDocuments();
   }, [searchingTxt, refresh]);
 
+  const handleRemoveFile = (indexToRemove) => {
+    setDocuments((prevDocs) =>
+      prevDocs.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
   return (
     <div className="flex flex-col max-w-6xl mx-auto mb-20 px-4">
       <DialogBox />
@@ -937,9 +948,15 @@ const DocumentUpload = ({ searchingTxt = null }) => {
                       <TableCell className="text-gray-700">
                         {row?.entrepreneurEmail}
                       </TableCell>
-                      <TableCell>
-                        <FeatureModal {...row} />
-                      </TableCell>
+                      {user?.role !== "Admin" && (
+                        <TableCell>
+                          <FeatureModal
+                            videoFilled={videoFilled}
+                            setVideoFilled={setVideoFilled}
+                            {...row}
+                          />
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
