@@ -66,12 +66,14 @@ const EntrepreneurBusiness = () => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
+  const [videoFilled, setVideoFilled] = useState(false);
+
   return (
-    <div className="w-full z-30 relative mx-auto p-10 pt-6  bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] min-h-screen">
+    <div className="w-full z-30 relative mx-auto p-10 pt-6  bg-gradient-to-b from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d] min-h-screen">
       {/* Search Bar */}
       <form className="mb-10 z-10">
         <div className="flex flex-col max-w-md mx-auto">
-          <div className="flex border-2 border-blue-500 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div className="flex border-2 focus:ring-[#ac9c8d] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
             <input
               type="text"
               value={searchTxt}
@@ -79,7 +81,7 @@ const EntrepreneurBusiness = () => {
               placeholder={`Search by pitchTitle ${
                 getUser?.role === "Admin" ? "or entrepreneur email" : ""
               }...`}
-              className="w-full outline-none bg-white text-gray-600 text-md px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full outline-none bg-white text-gray-600 text-md px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#ac9c8d]"
             />
           </div>
           {errors.search && (
@@ -91,7 +93,7 @@ const EntrepreneurBusiness = () => {
       {/* Accordion for CompanyInfo */}
       <div className="border-b border-gray-300 mb-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
         <button
-          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
+          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
           onClick={() => toggleAccordion(0)}
         >
           <span className="text-lg font-semibold text-gray-700">
@@ -105,7 +107,11 @@ const EntrepreneurBusiness = () => {
         </button>
         {activeIndex === 0 && (
           <div className="p-6 w-[80vw] mx-auto">
-            <CompanyInfo validateField={validateField} errors={errors} />
+            <CompanyInfo
+              validateField={validateField}
+              searchingTxt={searchTxt}
+              errors={errors}
+            />
           </div>
         )}
       </div>
@@ -113,7 +119,7 @@ const EntrepreneurBusiness = () => {
       {/* Accordion for DocumentUpload */}
       <div className="border-b border-gray-300 mb-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
         <button
-          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
+          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
           onClick={() => toggleAccordion(1)}
         >
           <span className="text-lg font-semibold text-gray-700">
@@ -127,7 +133,12 @@ const EntrepreneurBusiness = () => {
         </button>
         {activeIndex === 1 && (
           <div className="p-6 mx-auto">
-            <DocumentUpload validateField={validateField} errors={errors} />
+            <DocumentUpload
+              videoFilled={videoFilled}
+              setVideoFilled={setVideoFilled}
+              validateField={validateField}
+              errors={errors}
+            />
           </div>
         )}
       </div>
@@ -135,7 +146,7 @@ const EntrepreneurBusiness = () => {
       {/* Accordion for VideoImage */}
       <div className="border-b border-gray-300 mb-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
         <button
-          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
+          className="w-full flex justify-between items-center text-left px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-100 hover:from-blue-200 hover:to-purple-200 focus:outline-none rounded-t-lg"
           onClick={() => toggleAccordion(2)}
         >
           <span className="text-lg font-semibold text-gray-700">
@@ -149,7 +160,12 @@ const EntrepreneurBusiness = () => {
         </button>
         {activeIndex === 2 && (
           <div className="p-6 mx-auto">
-            <VideoImage validateField={validateField} errors={errors} />
+            <VideoImage
+              videoFilled={videoFilled}
+              setVideoFilled={setVideoFilled}
+              validateField={validateField}
+              errors={errors}
+            />
           </div>
         )}
       </div>
