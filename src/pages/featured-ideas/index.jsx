@@ -113,7 +113,7 @@ const FeaturedIdeas = () => {
             key={company._id}
             className="bg-white rounded-lg relative shadow-md p-6"
           >
-            {entrepreneurs[index].Featured ? (
+            {entrepreneurs[index].featured ? (
               <div className="flex w-max ms-auto items-center ☻2">
                 <Star
                   sx={{
