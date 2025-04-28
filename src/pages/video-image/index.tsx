@@ -1,5 +1,5 @@
 // React Imports
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useRecordWebcam } from "react-record-webcam";
 import Image from "next/image";
@@ -196,7 +196,7 @@ interface EnhancedTableToolbarProps {
   numSelected: number;
 }
 
-const VideoImage = ({ searchingTxt = null }) => {
+const VideoImage = ({ searchingTxt = null, videoFilled, setVideoFilled }) => {
   const [logo, setLogo] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [order, setOrder] = useState<Order>("asc");
@@ -218,6 +218,14 @@ const VideoImage = ({ searchingTxt = null }) => {
 
   const logoInputRef = useRef();
   const videoInputRef = useRef();
+
+  useEffect(() => {
+    if (video) {
+      setVideoFilled(true);
+    } else {
+      setVideoFilled(false);
+    }
+  }, [video]);
 
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
