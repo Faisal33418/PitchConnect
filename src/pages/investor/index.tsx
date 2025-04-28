@@ -394,9 +394,9 @@ const Investor = () => {
         ) : (
           <>
             <Tooltip title="Filter list">
-              <IconButton>
+              {/* <IconButton>
                 <FilterListIcon />
-              </IconButton>
+              </IconButton> */}
             </Tooltip>
           </>
         )}
@@ -587,13 +587,13 @@ const Investor = () => {
                       sx={{ cursor: "pointer" }}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox
+                        {/* <Checkbox
                           color="primary"
                           checked={isItemSelected}
                           inputProps={{
                             "aria-labelledby": labelId,
                           }}
-                        />
+                        /> */}
                       </TableCell>
                       <TableCell align="right" sx={{ textAlign: "start" }}>
                         {row.fullName}
@@ -680,10 +680,10 @@ const Investor = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Paper>
-        <FormControlLabel
+        {/* <FormControlLabel
           control={<Switch checked={dense} onChange={handleChangeDense} />}
           label="Dense padding"
-        />
+        /> */}
       </Box>
       {isModalOpen && (
         <UserForm
