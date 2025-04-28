@@ -36,7 +36,12 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { NotificationsOutlined } from "@mui/icons-material";
+import {
+  Chat,
+  ChatBubble,
+  ChatBubbleRounded,
+  NotificationsOutlined,
+} from "@mui/icons-material";
 import Bids from "@/components/bids/Bids";
 import MyMessages from "@/components/messages/MyMessages";
 
@@ -208,9 +213,9 @@ const Navbar: React.FC = () => {
 
   // Dynamic color handler
   const handleDynamicColor = (e: any) => {
-    const selectedColor = e.target.value;
-    localStorage.setItem("color", selectedColor);
-    setBgColor(selectedColor); // Update state to change the color in real-time
+    // const selectedColor = e.target.value;
+    // localStorage.setItem("color", selectedColor);
+    // setBgColor(selectedColor); // Update state to change the color in real-time
   };
 
   // Reset dynamic color
@@ -330,7 +335,13 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="flex  text-black  items-center sticky  top-0 z-50 bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] ">
+    <div
+      className="flex items-center sticky top-0 z-50  
+bg-[radial-gradient(ellipse_at_top,_#efe9e1_0%,_#ac9c8d_70%)]  
+border-b border-[#ac9c8d]/50  
+shadow-[0_0_12px_rgba(172,156,141,0.2)]  
+text-[#3a3630] hover:text-[#1a1714] transition-colors"
+    >
       <nav
         className={`p-5 w-full  border-b-[#E5E9EB] ${token ? "" : ""}`}
         style={{ backgroundColor: token ? bgColor || "" : "" }} // Use bgColor state here
@@ -378,13 +389,13 @@ const Navbar: React.FC = () => {
                         return (
                           <Link
                             href={item?.link}
-                            className="flex bg-clip-text bg-gradient-to-r text-lg text-transparent font-semibold from-white/50 gap-1 hover:cursor-pointer hover:font-extrabold hover:transition-all to-white"
+                            className="flex bg-clip-text text-lg  font-semibold  gap-1 hover:cursor-pointer hover:font-extrabold hover:transition-all text-gray-800"
                           >
                             {item.title}{" "}
                           </Link>
                         );
                       })}
-                      {token && (
+                      {/* {token && (
                         <div className="flex items-center relative">
                           <button
                             className="flex bg-clip-text bg-gradient-to-r text-lg text-transparent font-semibold from-white/50 gap-1 hover:cursor-pointer hover:font-extrabold hover:transition-all to-white"
@@ -407,8 +418,18 @@ const Navbar: React.FC = () => {
                             alt=""
                           />
                         </div>
+                      )} */}
+                      {myUser?.role == "Admin" || !myUser ? (
+                        ""
+                      ) : (
+                        <Link href="/chatScreen">
+                          <Chat
+                            size={25}
+                            aria-describedby={id}
+                            className="text-gray-800 cursor-pointer"
+                          />
+                        </Link>
                       )}
-                      {myUser?.role == "Admin" || !myUser ? "" : <MyMessages />}
 
                       <Bids />
                     </div>
