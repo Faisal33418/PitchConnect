@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
@@ -7,18 +7,20 @@ import SendIcon from "@mui/icons-material/Send";
 import ChatIcon from "@mui/icons-material/Chat";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import { Button } from "@mui/material";
+import { Button, Avatar, Typography } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { ThreeCircles } from "react-loader-spinner";
-import { useAppContext } from "@/context/AppContext";
+import moment from "moment";
 
 export default function ChatModel({ receiver, name, image }) {
-  const { messages, setMessages } = useAppContext();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [messages, setMessages] = useState({ chat: [] }); // Local state for each chat instance
+
+  const myUser = JSON.parse(localStorage.getItem("user"));
 
   const toggleDrawer = (open) => (event) => {
     if (
@@ -30,182 +32,255 @@ export default function ChatModel({ receiver, name, image }) {
     setOpen(open);
   };
 
-  const myUser = JSON.parse(localStorage.getItem("user"));
-
   const sendMessage = async () => {
     if (input.trim() === "") return;
 
     setLoading(true);
+    const messageContent = input;
+    setInput("");
 
     try {
-      const senderType = myUser?.role; // e.g., 'Investor' or 'Entrepreneur'
+      const senderType = myUser?.role;
       const receiverType =
-        senderType == "Investor" ? "Entrepreneur" : "Investor"; // The role of the receiver, make sure it's a valid role like 'Investor' or 'Entrepreneur'
+        senderType === "Investor" ? "Entrepreneur" : "Investor";
 
-      const response = await axios.post(
-        `http://localhost:8080/api/chat/send-message/${myUser?._id}/${receiver}`,
-        {
-          message: input,
-          sender: myUser?._id, // Send the sender ID
-          receiver: receiver, // Send the receiver ID
-          senderType, // Send sender's role
-          receiverType, // Send receiver's role (either 'Investor' or 'Entrepreneur')
-        }
-      );
-
-      setMessages((prevMessages) => ({
-        ...prevMessages,
+      // Update local state immediately
+      setMessages((prev) => ({
+        ...prev,
         chat: [
-          ...(prevMessages?.chat || []),
-          { message: input, sender: myUser?._id },
+          ...(prev?.chat || []),
+          { message: messageContent, sender: myUser?._id },
         ],
       }));
 
-      setInput(""); // Clear input field after sending
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Error sending message");
-    }
+      await axios.post(
+        `http://localhost:8080/api/chat/send-message/${myUser?._id}/${receiver}`,
+        {
+          message: messageContent,
+          sender: myUser?._id,
+          receiver: receiver,
+          senderType,
+          receiverType,
+        }
+      );
 
-    setLoading(false);
+      // Refresh messages after sending to ensure sync
+      await fetchMessages();
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // toast.error(error.response?.data?.message || "Error sending message");
+      // Revert if failed
+      setInput(messageContent);
+      setMessages((prev) => ({
+        ...prev,
+        chat: prev?.chat?.filter((msg) => msg.message !== messageContent) || [],
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await axios.get(
         `http://localhost:8080/api/chat/messages/${myUser?._id}/${receiver}`
       );
       setMessages(response.data);
     } catch (error) {
-      console.log("Error fetching messages:", error);
-    }
-  };
-
-  React.useEffect(() => {
-    if (myUser?._id && receiver) {
-      fetchMessages();
+      console.error("Error fetching messages:", error);
+      // toast.error("Failed to load messages");
     }
   }, [myUser?._id, receiver]);
 
-  React.useEffect(() => {
-    setDisabled(input.trim() === "");
-  }, [input]);
+  useEffect(() => {
+    if (open && myUser?._id && receiver) {
+      fetchMessages();
+    }
+  }, [open, myUser?._id, receiver, fetchMessages]);
+
+  useEffect(() => {
+    setDisabled(input.trim() === "" || loading);
+  }, [input, loading]);
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !disabled) {
+      sendMessage();
+    }
+  };
 
   return (
     <div>
-      {/* Floating Chat Button */}
-      <Button variant="contained" onClick={toggleDrawer(true)}>
-        <ChatIcon />
+      <Button
+        variant="contained"
+        onClick={toggleDrawer(true)}
+        sx={{
+          textTransform: "none",
+          borderRadius: "4px",
+          padding: "8px 16px",
+        }}
+      >
+        <ChatIcon sx={{ marginRight: 1 }} />
+        Chat
       </Button>
 
-      {/* Chat Drawer */}
       <Drawer
         anchor="bottom"
         open={open}
         onClose={toggleDrawer(false)}
         sx={{
           "& .MuiDrawer-paper": {
-            height: "auto",
+            height: "60vh",
             width: "100%",
             maxWidth: "400px",
             marginLeft: "auto",
-            borderTopLeftRadius: "8px",
-            borderTopRightRadius: "8px",
+            borderTopLeftRadius: "12px",
+            borderTopRightRadius: "12px",
+            boxShadow: 3,
           },
         }}
       >
         <Box
           sx={{
-            p: 2,
             display: "flex",
             flexDirection: "column",
             height: "100%",
           }}
         >
           {/* Header */}
-          <div className="p-4 rounded-t-md bg-gray-200 flex items-center gap-2">
-            <img
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              bgcolor: "background.paper",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Avatar
               src={image ? `http://localhost:8080${image}` : "/user.avif"}
-              alt="Avatar"
-              width={35}
-              height={35}
-              className="rounded-lg border border-blue-500 hover:transition-all object"
+              alt={name}
+              sx={{ width: 40, height: 40 }}
             />
-            <h5 className="text-md capitalize">{name}</h5>
-          </div>
+            <Typography variant="subtitle1" fontWeight="medium">
+              {name}
+            </Typography>
+          </Box>
 
           {/* Chat Messages */}
-          <Paper
+          <Box
             sx={{
               flexGrow: 1,
               p: 2,
               overflowY: "auto",
-              maxHeight: "50%",
-              height: "300px",
-              overflowY: "scroll",
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              bgcolor: "background.default",
             }}
           >
             {messages?.chat?.length > 0 ? (
               messages.chat.map((msg, index) => (
-                <Box key={index} sx={{}}>
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      msg.sender === myUser?._id ? "flex-end" : "flex-start",
+                  }}
+                >
                   <Paper
                     sx={{
-                      display: "inline-block",
-                      p: 1,
-                      backgroundColor:
-                        msg.sender === myUser?._id ? "#1976D2" : "#E0E0E0",
-                      color: msg.sender === myUser?._id ? "white" : "black",
+                      p: 1.5,
+                      maxWidth: "75%",
+                      bgcolor:
+                        msg.sender === myUser?._id
+                          ? "primary.main"
+                          : "grey.100",
+                      color:
+                        msg.sender === myUser?._id ? "white" : "text.primary",
                       borderRadius: 2,
+                      boxShadow: 1,
                     }}
                   >
-                    {msg.message}
+                    <Typography variant="body1">
+                      {msg.message}
+
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        sx={{
+                          mt: 0.5,
+                        }}
+                      >
+                        {new Date(msg?.id || Date.now()).toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </Typography>
+                    </Typography>
                   </Paper>
                 </Box>
               ))
             ) : (
-              <Box sx={{ textAlign: "center", color: "gray" }}>
-                No messages yet
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  color: "text.secondary",
+                }}
+              >
+                <Typography>No messages yet</Typography>
               </Box>
             )}
-          </Paper>
+          </Box>
 
           {/* Message Input */}
           <Box
-            sx={{ display: "flex", p: 1, gap: "1rem", position: "relative" }}
+            sx={{
+              p: 2,
+              display: "flex",
+              gap: 1,
+              bgcolor: "background.paper",
+              borderTop: "1px solid",
+              borderColor: "divider",
+            }}
           >
             <TextField
               fullWidth
               variant="outlined"
               placeholder="Type a message..."
               value={input}
-              sx={{ width: "100%" }}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+              onKeyPress={handleKeyPress}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "20px",
+                },
+              }}
             />
-            {loading ? (
-              <div className="flex justify-center items-center">
-                <ThreeCircles
-                  height={30}
-                  width={30}
-                  color="black"
-                  wrapperClass="flex justify-center absolute right-[30px] top-1/2 -translate-y-1/2"
-                />
-              </div>
-            ) : (
-              <IconButton
-                disabled={disabled}
-                sx={{
-                  position: "absolute",
-                  right: "5px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }}
-                color={disabled ? "secondary" : "primary"}
-                onClick={sendMessage}
-              >
+            <IconButton
+              disabled={disabled || loading}
+              color="primary"
+              onClick={sendMessage}
+              sx={{
+                width: 40,
+                height: 40,
+                alignSelf: "center",
+              }}
+            >
+              {loading ? (
+                <ThreeCircles height={20} width={20} color="inherit" />
+              ) : (
                 <SendIcon />
-              </IconButton>
-            )}
+              )}
+            </IconButton>
           </Box>
         </Box>
       </Drawer>
