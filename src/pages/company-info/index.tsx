@@ -490,8 +490,31 @@ const CompanyInfo = ({ searchingTxt = null }) => {
   // fetch companies funtion
   const fetchCompanies = async () => {
     const token = localStorage.getItem("token");
-    let getUser = localStorage.getItem("user");
-    getUser = JSON.parse(getUser);
+    let userString = localStorage.getItem("user");
+
+    // Check if user data exists in localStorage
+    if (!userString) {
+      console.warn("User data not found in localStorage");
+      setRows([]);
+      return;
+    }
+
+    // Parse user data safely
+    let getUser;
+    try {
+      getUser = JSON.parse(userString);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      setRows([]);
+      return;
+    }
+
+    // Ensure getUser has expected structure
+    if (!getUser || !getUser.role) {
+      console.warn("Invalid user data structure");
+      setRows([]);
+      return;
+    }
 
     const endPoint = "company",
       id = null,
@@ -501,58 +524,7 @@ const CompanyInfo = ({ searchingTxt = null }) => {
       },
       reqData = null;
 
-    const apiResponse = await APIs(
-      endPoint,
-      id,
-      method,
-      headers,
-      reqData,
-      false
-    );
-
-    if (apiResponse?.status === 200) {
-      let requireData = null;
-      // show specific data for entrepreneur
-      if (getUser?.role === "Entrepreneur") {
-        requireData = apiResponse?.data?.data;
-        let entrepreneurData = requireData.filter(
-          (company) => company?.entrepreneurId?._id === getUser?._id
-        );
-        if (searchingTxt) {
-          entrepreneurData = entrepreneurData.filter(
-            (company) => company?.pitchTitle === searchingTxt
-          );
-        }
-        setRows(entrepreneurData);
-      } else if (getUser?.role === "Admin") {
-        requireData = apiResponse?.data?.data;
-        if (searchingTxt) {
-          requireData = requireData.filter(
-            (company) =>
-              company?.pitchTitle === searchingTxt ||
-              company?.entrepreneurId?.email === searchingTxt
-          );
-        }
-        setRows(requireData);
-      }
-    }
-  };
-
-  React.useEffect(() => {
-    fetchCompanies();
-
-    const fetchEntrepreneurs = async () => {
-      const token = localStorage.getItem("token");
-      let getUser = localStorage.getItem("user");
-      getUser = JSON.parse(getUser);
-
-      const endPoint = "entrepreneur/get-entrepreneur",
-        id = null,
-        method = "GET",
-        headers = {
-          Authorization: `Bearer ${token}`,
-        },
-        reqData = null;
+    try {
       const apiResponse = await APIs(
         endPoint,
         id,
@@ -561,21 +533,88 @@ const CompanyInfo = ({ searchingTxt = null }) => {
         reqData,
         false
       );
+
       if (apiResponse?.status === 200) {
-        let requireData = null;
-        // show specific data for entrepreneur
-        if (getUser?.role === "Entrepreneur") {
-          requireData = apiResponse?.data?.data?.filter(
-            (entrepreneur) => entrepreneur?.entrepreneurId?._id === getUser?._id
+        const allCompanies = apiResponse?.data?.data || [];
+        let filteredCompanies = [];
+
+        // Show specific data for entrepreneur
+        if (getUser.role === "Entrepreneur") {
+          filteredCompanies = allCompanies.filter(
+            (company) => company?.entrepreneurId?._id === getUser._id
           );
-          setRows2(requireData);
-        } else if (getUser?.role === "Admin") {
-          requireData = apiResponse?.data?.data;
-          setRows2(requireData);
+
+          if (searchingTxt) {
+            filteredCompanies = filteredCompanies.filter((company) =>
+              (company?.pitchTitle?.toLowerCase() || "").startsWith(
+                searchingTxt.toLowerCase()
+              )
+            );
+          }
+        } else if (getUser.role === "Admin") {
+          filteredCompanies = allCompanies;
+
+          if (searchingTxt) {
+            filteredCompanies = filteredCompanies.filter(
+              (company) =>
+                company?.pitchTitle === searchingTxt ||
+                company?.entrepreneurId?.email === searchingTxt
+            );
+          }
         }
+
+        setRows(filteredCompanies);
+      } else {
+        console.warn("API response error:", apiResponse);
+        // Keep existing data on error
       }
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+      // Keep existing data on error
+    }
+  };
+
+  const fetchEntrepreneurs = async () => {
+    const token = localStorage.getItem("token");
+    let getUser = localStorage.getItem("user");
+    getUser = JSON.parse(getUser);
+
+    const endPoint = "entrepreneur/get-entrepreneur",
+      id = null,
+      method = "GET",
+      headers = {
+        Authorization: `Bearer ${token}`,
+      },
+      reqData = null;
+    const apiResponse = await APIs(
+      endPoint,
+      id,
+      method,
+      headers,
+      reqData,
+      false
+    );
+    if (apiResponse?.status === 200) {
+      let requireData = null;
+      // show specific data for entrepreneur
+      if (getUser?.role === "Entrepreneur") {
+        requireData = apiResponse?.data?.data?.filter(
+          (entrepreneur) => entrepreneur?.entrepreneurId?._id === getUser?._id
+        );
+        setRows2(requireData);
+      } else if (getUser?.role === "Admin") {
+        requireData = apiResponse?.data?.data;
+        setRows2(requireData);
+      }
+    }
+  };
+  React.useEffect(() => {
+    const fetchData = async () => {
+      await fetchCompanies();
+      await fetchEntrepreneurs();
     };
-    fetchEntrepreneurs();
+
+    fetchData();
   }, [searchingTxt, refresh]);
 
   return (
@@ -596,7 +635,7 @@ const CompanyInfo = ({ searchingTxt = null }) => {
                 Register
               </Button>
             </IconButton>
-            <IconButton onClick={fetchCompanies}>
+            <IconButton onClick={handleRefresh}>
               <RefreshIcon />
             </IconButton>
           </div>

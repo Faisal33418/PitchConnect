@@ -103,7 +103,7 @@ const ContactPage = () => {
                     href="tel:+1234567890"
                     className="text-purple-300 hover:text-purple-200 transition"
                   >
-                    +92 3164729597
+                    +92 316 4729597
                   </a>
                 </div>
               </div>
@@ -115,9 +115,8 @@ const ContactPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-white">Visit Us</h3>
                   <p className="text-emerald-300">
-                    I-14/03 Islamabad
+                    Islamabad
                     <br />
-                    Pakistan
                   </p>
                 </div>
               </div>
@@ -125,12 +124,10 @@ const ContactPage = () => {
 
             <div className="pt-6">
               <h3 className="text-lg font-semibold text-white mb-4">
-                Connect With Us 
-                <br />
-                @Pitch Connect
+                Connect With Us
               </h3>
-              {/* <div className="flex space-x-4">
-                {["P", "I", "T", "C", "H","Connect"].map((social) => (
+              <div className="flex space-x-4">
+                {["P", "I", "T", "C", "H"].map((social) => (
                   <div
                     key={social}
                     className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
@@ -138,7 +135,7 @@ const ContactPage = () => {
                     <span className="text-white/80">{social.charAt()}</span>
                   </div>
                 ))}
-              </div> */}
+              </div>
             </div>
           </div>
 
