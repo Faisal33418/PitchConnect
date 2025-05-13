@@ -53,23 +53,23 @@ function Footer(): ReactElement {
                   <li>
                     <a
                       className="text-black hover:text-gray-900 font-semibold block pb-2 text-sm"
-                      href="https://www.creative-tim.com/presentation"
+                      href="https://www.linkedin.comn"
                     >
-                      About Us
+                      LinkedIn
                     </a>
                   </li>
                   <li>
                     <a
                       className=" text-black font-semibold block pb-2 text-sm"
-                      href="https://blog.creative-tim.com"
+                      href="https://www.twitter.com"
                     >
-                      Blog
+                      Twitter
                     </a>
                   </li>
                   <li>
                     <a
                       className="text-black font-semibold block pb-2 text-sm"
-                      href="https://www.github.com/creativetimofficial"
+                      href="https://www.github.com/"
                     >
                       Github
                     </a>
@@ -77,9 +77,9 @@ function Footer(): ReactElement {
                   <li>
                     <a
                       className="text-black font-semibold block pb-2 text-sm"
-                      href="https://www.creative-tim.com/bootstrap-themes/free"
+                      href="https://www.teams.com"
                     >
-                      Free Products
+                      Teams
                     </a>
                   </li>
                 </ul>

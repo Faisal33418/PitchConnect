@@ -24,7 +24,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import EditIcon from "@mui/icons-material/Edit";
 import UserForm from "@/components/form";
-import { entrepreneurSchema } from "@/layout/user-data";
+import { investorSchema } from "@/layout/user-data";
 import { Button } from "@mui/material";
 import APIs from "@/utils/api-handler";
 import Dialog from "@mui/material/Dialog";
@@ -39,12 +39,21 @@ interface Data {
   id: string;
   fullName: string;
   email: string;
-  phoneNumber: number;
+  phoneNumber: string;
   profilePicture: string;
-  location: string;
-  industry: string;
+  companyName: string;
+  industryInterest: string;
   Bios: string;
   skills: string;
+  location: string;
+  startupStagePreference: string;
+  investmentAmountRange: string;
+  geographicalPreference: string;
+  typeOfInvestment: string;
+  investmentGoals: string;
+  investmentHistory: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -98,28 +107,16 @@ const headCells: readonly HeadCell[] = [
     label: "Email",
   },
   {
-    id: "phoneNumber",
-    numeric: true,
-    disablePadding: false,
-    label: "Phone Number",
-  },
-  {
     id: "profilePicture",
     numeric: false,
     disablePadding: false,
     label: "Profile Picture",
   },
   {
-    id: "location",
-    numeric: false,
+    id: "phoneNumber",
+    numeric: true,
     disablePadding: false,
-    label: "Location",
-  },
-  {
-    id: "industry",
-    numeric: false,
-    disablePadding: false,
-    label: "Industry",
+    label: "Phone Number",
   },
   {
     id: "Bios",
@@ -128,11 +125,18 @@ const headCells: readonly HeadCell[] = [
     label: "Bios",
   },
   {
-    id: "skills",
+    id: "Industry interset",
     numeric: false,
     disablePadding: false,
-    label: "Skills",
+    label: "Industry Interset",
   },
+  {
+    id: "Location",
+    numeric: false,
+    disablePadding: false,
+    label: "Location",
+  },
+  
 ];
 
 interface EnhancedTableProps {
@@ -204,7 +208,7 @@ interface EnhancedTableToolbarProps {
   numSelected: number;
 }
 
-const Entrepreneur = () => {
+const Investor = () => {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("pitchTitle");
   const [selected, setSelected] = React.useState<readonly number[]>([]);
@@ -257,13 +261,11 @@ const Entrepreneur = () => {
         selected.slice(selectedIndex + 1)
       );
     }
-    console.log({ newSelected });
     setId(newSelected[0]);
     setSelected(newSelected);
     localStorage.setItem("actionId", id);
     const getCompany = rows.filter((item) => item._id === newSelected[0]);
     setActiveCompany(getCompany);
-    console.log({ activeCompany });
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -332,11 +334,11 @@ const Entrepreneur = () => {
           </>
         ) : (
           <>
-            {/* <Tooltip title="Filter list">
-              <IconButton>
+            <Tooltip title="Filter list">
+              {/* <IconButton>
                 <FilterListIcon />
-              </IconButton>
-            </Tooltip> */}
+              </IconButton> */}
+            </Tooltip>
           </>
         )}
         <Tooltip title="Filter list">
@@ -400,7 +402,7 @@ const Entrepreneur = () => {
   };
 
   const handleEdit = () => {
-    localStorage.setItem("action", "entrepreneur update");
+    localStorage.setItem("action", "investor update");
     setIsModalOpen(true);
     const id = localStorage.getItem("actionId");
     const activeCompany = rows.filter((item) => item._id === id);
@@ -425,7 +427,6 @@ const Entrepreneur = () => {
         reqData,
         false
       );
-      console.log({ apiResponse });
       if (apiResponse?.status === 200) {
         toast.success(apiResponse?.data?.message);
         setTimeout(() => {
@@ -449,7 +450,7 @@ const Entrepreneur = () => {
   }, []);
 
   React.useEffect(() => {
-    const fetchEntrepreneurs = async () => {
+    const fetchInvestors = async () => {
       const token = localStorage.getItem("token");
       let getUser = localStorage.getItem("user");
       getUser = JSON.parse(getUser);
@@ -471,7 +472,7 @@ const Entrepreneur = () => {
         false
       );
 
-      if (apiResponse.status === 200) {
+      if (apiResponse?.status === 200) {
         let requireData = null;
         // show specific data for entrepreneur
         if (getUser?.role === "Admin") {
@@ -483,7 +484,7 @@ const Entrepreneur = () => {
         console.log("something went wrong during data fetching");
       }
     };
-    fetchEntrepreneurs();
+    fetchInvestors();
   }, [refresh]);
 
   return (
@@ -500,7 +501,7 @@ const Entrepreneur = () => {
             <Table
               sx={{ minWidth: 750 }}
               aria-labelledby="tableTitle"
-              // size={dense ? "small" : "medium"}
+              size={dense ? "small" : "medium"}
             >
               <EnhancedTableHead
                 numSelected={selected.length}
@@ -542,41 +543,50 @@ const Entrepreneur = () => {
                         {row.email}
                       </TableCell>
                       <TableCell align="right" sx={{ textAlign: "start" }}>
-                        {row.phoneNumber}
-                      </TableCell>
-                      <TableCell align="right" sx={{ textAlign: "start" }}>
                         <img
                           src={`${process.env.NEXT_PUBLIC_HOSTNAME}${row?.profilePicture[0]}`}
-                          alt="Entrepreneur profile picture"
+                          alt="Investot profile picture"
                           title={row.fullName}
                           style={{
-                            width: "70px",
+                            width: "100px",
                             objectFit: "cover",
                             borderRadius: "10px",
                           }}
                         />
                       </TableCell>
-
                       <TableCell align="right" sx={{ textAlign: "start" }}>
-                        {row.location}
-                      </TableCell>
-                      <TableCell align="right" sx={{ textAlign: "start" }}>
-                        {row.industry}
+                        {row.phoneNumber}
                       </TableCell>
                       <TableCell align="right" sx={{ textAlign: "start" }}>
                         {row.Bios}
                       </TableCell>
-                      <TableCell align="right">{row.skills}</TableCell>
+                      {/* <TableCell align="right" sx={{ textAlign: "start" }}>
+                        {row.industryInterest?.map((item, index) => (
+                          <span key={index}>{item}</span>
+                        ))}
+                      </TableCell> */}
+                      <TableCell align="right" sx={{ textAlign: "start" }}>
+                        {row.skills}
+                      </TableCell>
+                      <TableCell align="right">{row.location}</TableCell>
+                      <TableCell align="right" sx={{ textAlign: "start" }}>
+                        {row.startupStagePreference}
+                      </TableCell>
+                      <TableCell align="right" sx={{ textAlign: "start" }}>
+                        {row.investmentAmountRange}
+                      </TableCell>
+                      <TableCell align="right" sx={{ textAlign: "start" }}>
+                        {row.geographicalPreference}
+                      </TableCell>
+                     
                     </TableRow>
                   );
                 })}
                 {emptyRows > 0 && (
                   <TableRow
-                    style={
-                      {
-                        // height: (dense ? 33 : 53) * emptyRows,
-                      }
-                    }
+                    style={{
+                      height: (dense ? 33 : 53) * emptyRows,
+                    }}
                   >
                     <TableCell colSpan={6} />
                   </TableRow>
@@ -601,11 +611,11 @@ const Entrepreneur = () => {
       </Box>
       {isModalOpen && (
         <UserForm
-          title={"Maintain Entrepreneur Profile"}
+          title={"Maintain Investor Profile"}
           isOpen={isModalOpen}
           closeHandler={modalCloseHandler}
           activeUser={activeUser}
-          fields={entrepreneurSchema}
+          fields={investorSchema}
           data={activeCompany}
           updateId={id}
         />
@@ -613,4 +623,4 @@ const Entrepreneur = () => {
     </>
   );
 };
-export default Entrepreneur;
+export default Investor;

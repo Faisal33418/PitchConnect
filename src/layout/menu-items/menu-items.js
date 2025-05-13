@@ -71,11 +71,11 @@ const MenuItems = [
     link: "/entrepreneur-business",
   },
 
-  {
-    title: "Contract",
-    icon: <Gavel fontSize="small" color="action" className="sidebar-icons" />,
-    link: "/docusign",
-  },
+  // {
+  //   title: "Contract",
+  //   icon: <Gavel fontSize="small" color="action" className="sidebar-icons" />,
+  //   link: "/docusign",
+  // },
   {
     title: "Featured Ideas",
     icon: (
@@ -88,7 +88,7 @@ const MenuItems = [
     link: "/featured-ideas",
   },
   {
-    title: "Social Properity",
+    title: "Social Prosperity",
     icon: (
       <SocialDistanceIcon
         fontSize="small"

@@ -1,26 +1,20 @@
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AdminItems, MenuItems } from "./menu-items/menu-items";
 import { useRouter } from "next/router";
-import MenuIcon from "@mui/icons-material/Menu";
-import toast, { Toaster } from "react-hot-toast";
 import { Chat } from "@mui/icons-material";
+import toast, { Toaster } from "react-hot-toast";
+import SocialDistanceIcon from "@mui/icons-material/SocialDistance";
 
 const SideBar = () => {
   const router = useRouter();
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
-
   const [activeLink, setActiveLink] = useState<string>(router.pathname);
   const [sidebarColor, setSidebarColor] = useState<string | null>(
     typeof window !== "undefined"
       ? localStorage.getItem("sidebarColor") || "#F6F8F9"
       : "#F6F8F9"
   );
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [activeUser, setActiveUser] = useState<any>(null);
-  const [position, setPosition] = useState({ x: 20, y: 100 });
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     // Get initial color and dropdown states from localStorage
@@ -29,23 +23,6 @@ const SideBar = () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       setActiveUser(user);
     }
-
-    // Close sidebar when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(event.target as Node)
-      ) {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   const handlePath = (e: React.MouseEvent, link: string) => {
@@ -53,7 +30,6 @@ const SideBar = () => {
       e.preventDefault();
     } else {
       setActiveLink(link);
-      setIsSidebarOpen(false);
     }
   };
 
@@ -66,32 +42,6 @@ const SideBar = () => {
   const handleResetColor = () => {
     localStorage.removeItem("sidebarColor");
     setSidebarColor("#F6F8F9");
-  };
-
-  // Dragging handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Calculate offset between mouse position and element position
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    e.stopPropagation();
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    setPosition({
-      x: e.clientX - dragOffset.x,
-      y: e.clientY - dragOffset.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener("mousemove", handleMouseMove);
-    document.removeEventListener("mouseup", handleMouseUp);
   };
 
   useEffect(() => {
@@ -108,44 +58,14 @@ const SideBar = () => {
     <div className="">
       <Toaster />
 
-      {/* Draggable Trigger Icon */}
+      {/* Sidebar - now fixed on the left */}
       <div
-        ref={triggerRef}
-        className="fixed z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg cursor-move hover:bg-gray-100 transition-all"
+        className="relative z-40 w-[240px] h-[90vh]  overflow-y-scroll hide-scrollbar"
         style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          transform: isSidebarOpen ? "rotate(90deg)" : "rotate(0deg)",
-          transition: "transform 0.2s ease",
-        }}
-        onMouseDown={handleMouseDown}
-        onClick={(e) => {
-          // Only toggle if not dragging
-          if (
-            Math.abs(e.clientX - (position.x + dragOffset.x)) < 5 &&
-            Math.abs(e.clientY - (position.y + dragOffset.y)) < 5
-          ) {
-            setIsSidebarOpen(!isSidebarOpen);
-          }
-        }}
-      >
-        <MenuIcon className="text-gray-600" />
-      </div>
-
-      {/* Sidebar */}
-      <div
-        ref={sidebarRef}
-        className={`fixed z-40 rounded-xl transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "w-[240px] opacity-100" : "w-0 opacity-0"
-        } overflow-hidden`}
-        style={{
-          backgroundColor: sidebarColor,
-          left: `${position.x + 50}px`,
-          top: `${position.y}px`,
           boxShadow: "2px 0 10px rgba(0,0,0,0.1)",
         }}
       >
-        <div className="h-[max-content] py-5  px-6 border-r flex flex-col">
+        <div className="h-[calc(88vh)] overflow-y-scroll py-5 px-6 border-r flex flex-col">
           {/* Side-bar items */}
           <div className="flex flex-col justify-between items-center mt-6 w-full">
             <nav className="flex-1 -mx-3 space-y-3 w-full">
@@ -178,8 +98,7 @@ const SideBar = () => {
                         ((item.title === "Entrepreneur Profile" ||
                           item.title === "Idea Pitches" ||
                           item.title === "Featured Ideas" ||
-                          item.title === "Contract" ||
-                          item.title === "Social Properity" ||
+                          // item.title === "Contract" ||
                           item.title === "Interprated Communication") &&
                           (activeUser?.role === "Entrepreneur" ||
                             activeUser?.role === "Admin"));
@@ -238,15 +157,176 @@ const SideBar = () => {
                     })}
                   </div>
                   {activeUser?.role !== "Admin" && (
-                    <Link
-                      className="group flex items-center px-4 py-2 text-gray-600 rounded transition-colors duration-300"
-                      href="/chatScreen"
-                    >
-                      <div className="flex gap-3">
-                        <Chat className="text-gray-400" />
-                        Messages
-                      </div>
-                    </Link>
+                    <>
+                      <Link
+                        onClick={() => setActiveLink("/chatScreen")}
+                        className={`group flex items-center px-4 py-2 text-gray-600 rounded transition-colors duration-300 ${
+                          activeLink == "/chatScreen" && "bg-gray-200"
+                        } `}
+                        href="/chatScreen"
+                      >
+                        <div className={`flex gap-3 `}>
+                          <Chat className="text-gray-400" />
+                          Messages
+                        </div>
+                      </Link>
+                    </>
+                  )}
+                  {activeUser?.role !== "Investor" && (
+                    <>
+                      <Link
+                        onClick={() => setActiveLink("/social-prosperity")}
+                        className={`group flex items-center px-4 py-2 text-gray-600 rounded transition-colors duration-300 ${
+                          activeLink == "/social-prosperity" && "bg-gray-200"
+                        } `}
+                        href={
+                          activeUser?.role == "Admin"
+                            ? "/social-data"
+                            : "/social-prosperity"
+                        }
+                      >
+                        <div className="flex gap-3">
+                          <SocialDistanceIcon className="text-gray-400" />
+                          Social Prosperity
+                        </div>
+                      </Link>
+                    </>
+                  )}
+                  {activeUser?.role !== "Admin" && (
+                    <>
+                      <Link
+                        onClick={() => setActiveLink("/my-contracts")}
+                        className={`group flex items-center px-4 py-2 text-gray-600 rounded transition-colors duration-300 ${
+                          activeLink == "/my-contracts" && "bg-gray-200"
+                        } `}
+                        href={"my-contracts"}
+                      >
+                        <div className="flex gap-3">
+                          <svg
+                            width="1.3rem"
+                            height="1.3rem"
+                            viewBox="0 0 64 64"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <rect
+                              x="12"
+                              y="8"
+                              width="40"
+                              height="48"
+                              rx="4"
+                              fill="#F2F2F2"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="20"
+                              x2="44"
+                              y2="20"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="28"
+                              x2="44"
+                              y2="28"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="36"
+                              x2="36"
+                              y2="36"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <path
+                              d="M42 48L52 38"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <path
+                              d="M50 40L56 44L48 52L44 46L50 40Z"
+                              fill="#4CAF50"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                          </svg>{" "}
+                          My Contracts
+                        </div>
+                      </Link>
+                    </>
+                  )}
+                  {activeUser?.role == "Admin" && (
+                    <>
+                      <Link
+                        onClick={() => setActiveLink("/send-contract")}
+                        className={`group flex items-center px-4 py-2 text-gray-600 rounded transition-colors duration-300 ${
+                          activeLink == "/send-contract" && "bg-gray-200"
+                        } `}
+                        href={"/send-contract"}
+                      >
+                        <div className="flex gap-3">
+                          <svg
+                            width="1.3rem"
+                            height="1.3rem"
+                            viewBox="0 0 64 64"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <rect
+                              x="12"
+                              y="8"
+                              width="40"
+                              height="48"
+                              rx="4"
+                              fill="#F2F2F2"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="20"
+                              x2="44"
+                              y2="20"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="28"
+                              x2="44"
+                              y2="28"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <line
+                              x1="20"
+                              y1="36"
+                              x2="36"
+                              y2="36"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <path
+                              d="M42 48L52 38"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                            <path
+                              d="M50 40L56 44L48 52L44 46L50 40Z"
+                              fill="#4CAF50"
+                              stroke="#333"
+                              stroke-width="2"
+                            />
+                          </svg>
+                          Send Contract
+                        </div>
+                      </Link>
+                    </>
                   )}
                 </div>
               )}
@@ -284,7 +364,7 @@ const SideBar = () => {
                   ))}
                 </div>
 
-                <div className="p-4 flex">
+                {/* <div className="p-4 flex">
                   <input
                     type="color"
                     placeholder="dynamic layout"
@@ -297,7 +377,7 @@ const SideBar = () => {
                   >
                     Reset Color
                   </button>
-                </div>
+                </div> */}
               </div>
             )}
         </div>

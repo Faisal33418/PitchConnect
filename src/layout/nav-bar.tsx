@@ -325,13 +325,25 @@ const Navbar: React.FC = () => {
   let myUser = JSON.parse(localStorage.getItem("user"));
 
   let user = localStorage.getItem("user");
+  let my_user = JSON.parse(localStorage.getItem("user"));
   user = JSON.parse(user);
   user = user?.profilePicture;
 
   const navItems = [
-    { title: "Home", icon: "🏠", link: "/" },
+    {
+      title: "Home",
+      icon: "🏠",
+      link: my_user?.role == "Admin" ? "/admin-ui" : "/landing",
+    },
     // { title: "About", icon: "📖", link: "/about" },
     { title: "Contact", icon: "📞", link: "/contact" },
+    { title: "Entrepreneur", icon: "🥼", link: "/enrepreneur-page" },
+    { title: "Investor", icon: "🥼", link: "/investor-page" },
+    {
+      title: my_user?.role == "Admin" ? "Admin" : "",
+      icon: my_user?.role == "Admin" ? "🥼" : "",
+      link: my_user?.role == "Admin" ? "/full-admin-ui" : "",
+    },
   ];
 
   return (
@@ -350,12 +362,12 @@ text-[#3a3630] hover:text-[#1a1714] transition-colors"
         <div className="w-full px-6">
           <div className="lg:flex lg:items-center lg:justify-between">
             {/* nav-logo */}
-            <Link href="/">
+            <Link href="/" className="self-end ">
               <img
                 src={"/Logo.svg"}
                 alt="Logo"
-                width={120}
-                height={50}
+                width={140}
+                height={10}
                 className="absolute mb-2 top-[-27px]"
               />
             </Link>

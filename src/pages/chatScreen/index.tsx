@@ -84,7 +84,7 @@ const ChatInterface = () => {
       }
     } catch (error) {
       console.error("Error fetching chats:", error);
-      toast.error("Failed to load chats");
+      // toast.error("Failed to load chats");
     } finally {
       setLoading(false);
     }
@@ -185,10 +185,14 @@ const ChatInterface = () => {
     }
   };
 
+  const extractUrlFromMessage = (message: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = message.match(urlRegex);
+    return matches ? matches[0] : "#";
+  };
+
   return (
     <div className="flex h-screen w-full bg-gray-100">
-      <Toaster position="top-right" />
-
       {/* Sidebar */}
       <div className="w-20 bg-gradient-to-b from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d] flex flex-col items-center pt-6">
         <div className="flex flex-col items-center space-y-6 mt-4">
@@ -222,7 +226,7 @@ const ChatInterface = () => {
               const otherUserId =
                 chat.sender === user?._id ? chat.receiver : chat.sender;
               const otherUser = usersData[otherUserId];
-              const lastMessage = chat.chat[chat.chat.length - 1];
+              // const lastMessage = chat.chat[chat.chat.length - 2];
               const unreadCount = chat.unreadCount || 0;
               const userName = otherUser?.fullName || "Unknown User";
 
@@ -250,7 +254,7 @@ const ChatInterface = () => {
                         {userName}
                       </h3>
                       <span className="text-xs text-gray-500">
-                        {lastMessage?.createdAt
+                        {/* {lastMessage?.createdAt
                           ? new Date(lastMessage.createdAt).toLocaleTimeString(
                               [],
                               {
@@ -258,11 +262,11 @@ const ChatInterface = () => {
                                 minute: "2-digit",
                               }
                             )
-                          : ""}
+                          : ""} */}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 truncate">
-                      {lastMessage?.message || "No messages yet"}
+                      {/* {lastMessage?.message || "No messages yet"} */}
                     </p>
                   </div>
                 </div>
@@ -346,7 +350,19 @@ const ChatInterface = () => {
                             : "bg-white text-gray-800 rounded-bl-none"
                         }`}
                       >
-                        <p>{msg.message}</p>
+                        <p>
+                          {msg.message.includes("https") ? (
+                            <a
+                              className=""
+                              target="_blank"
+                              href={extractUrlFromMessage(msg.message)}
+                            >
+                              📑<span className="underline">Contract</span>
+                            </a>
+                          ) : (
+                            <>{msg.message}</>
+                          )}
+                        </p>
                         <div
                           className={`text-xs mt-1 ${
                             isSender ? "text-blue-100" : "text-gray-500"
@@ -374,9 +390,9 @@ const ChatInterface = () => {
 
             {/* Message Input */}
             <div className="h-16 border-t bg-white p-2 flex items-center">
-              <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
+              {/* <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
                 <Paperclip size={20} className="text-gray-500" />
-              </button>
+              </button> */}
               <div className="flex-1 mx-2">
                 <input
                   type="text"

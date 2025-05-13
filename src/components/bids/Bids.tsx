@@ -6,6 +6,7 @@ import { NotificationAdd } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import axios from "axios";
 import { ThreeCircles } from "react-loader-spinner";
+import toast from "react-hot-toast";
 
 export default function Bids() {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
@@ -27,12 +28,16 @@ export default function Bids() {
   const [bid, setBid] = React.useState("");
   const getUser = JSON.parse(localStorage.getItem("user"));
   const getBids = async () => {
-    const response = await axios.get(
-      `http://localhost:8080/api/v1/pconnect-app/entrepreneur/get-my-bids/${getUser?._id}`
-    );
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/pconnect-app/entrepreneur/get-my-bids/${getUser?._id}`
+      );
 
-    setInvestor(response.data.investor_id);
-    setBid(response.data.bid_amount);
+      setInvestor(response.data.investor_id);
+      setBid(response.data.bid_amount);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   React.useEffect(() => {
@@ -51,7 +56,8 @@ export default function Bids() {
           investor_id: investor._id,
         }
       );
-
+      toast.success("Bid Accepted!");
+      window.location.reload();
       console.log(response);
     } catch (error) {
       console.log(error);

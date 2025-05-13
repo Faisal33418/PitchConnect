@@ -105,7 +105,7 @@ const SignIn = () => {
   return (
     <>
       <Toaster />
-      <div className="h-[88vh] bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] flex items-center justify-center p-4 overflow-hidden relative">
+      <div className="h-[88vh] bg-gradient-to-r from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d] flex items-center justify-center p-4 overflow-hidden relative">
         {/* Animated Blobs */}
         <div className="absolute w-full h-full top-0 left-0 pointer-events-none">
           <div className="blob blob-1 animate-blob-1"></div>

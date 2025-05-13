@@ -25,7 +25,11 @@ import {
   Modal,
 } from "@mui/material";
 import toast, { Toaster } from "react-hot-toast";
-import { AddCircleOutline, AddOutlined } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  AddOutlined,
+  PhoneDisabled,
+} from "@mui/icons-material";
 import { usePathname } from "next/navigation";
 
 const UserForm = ({
@@ -617,6 +621,8 @@ const UserForm = ({
           localStorage.setItem("authID", apiResponse?.data?.data?.authId);
         }
 
+        let phone = (fields[0].name = "PhoneNumber");
+        const preventUserUpdate = true;
         if (
           fields[0].name !== "pitchTitle" &&
           fields[0].name !== "logoBanner" &&
@@ -624,7 +630,13 @@ const UserForm = ({
           act !== "investor update" &&
           act !== "entrepreneur update"
         ) {
-          localStorage.setItem("user", JSON.stringify(apiResponse?.data?.data));
+          // localStorage.setItem("user", JSON.stringify(apiResponse?.data?.data));
+          if (!preventUserUpdate) {
+            localStorage.setItem(
+              "user",
+              JSON.stringify(apiResponse?.data?.data)
+            );
+          }
         } else if (fields[0].name === "pitchTitle") {
           localStorage.setItem(
             "company",
@@ -633,7 +645,7 @@ const UserForm = ({
         } else {
         }
         setTimeout(() => {
-          closeHandler();
+          // closeHandler();
         }, 2000);
       } else {
         toast.error("Please fill in all required fields correctly");
@@ -812,6 +824,8 @@ const UserForm = ({
 
   let myUser = JSON.parse(localStorage.getItem("user"));
 
+  const [phoneDisabled, setPhoneDisabled] = useState(true);
+
   return (
     <>
       <Modal
@@ -821,7 +835,7 @@ const UserForm = ({
       >
         <div className={classes.card}>
           <Card className="border relative border-10 bg-black">
-            <div className="p-10  bg-gradient-to-r from-[#141619] via-[#202E3A] to-[#050A44] text-white text-center text-2xl font-semibold">
+            <div className="p-10  bg-gradient-to-r from-[#efe9e1] via-[#d8ccc0] to-[#ac9c8d] text-black text-center text-2xl font-semibold">
               {myUser?.role == "Entrepreneur" && "Entrepreneur Profile"}
               {myUser?.role == "Admin" && "Admin Profile"}
               {myUser?.role == "Investor" && "Investor Profile"}
@@ -892,17 +906,40 @@ const UserForm = ({
                                   value={values[item.name] || ""}
                                   onChange={(event) => {
                                     const value = event.target.value;
-                                    const cleanedValue =
-                                      item.name === "phoneNumber" ||
+                                    let cleanedValue;
+
+                                    if (item.name === "phoneNumber") {
+                                      // Remove non-digit characters
+                                      const digitsOnly = value.replace(
+                                        /\D/g,
+                                        ""
+                                      );
+                                      if (digitsOnly.length < 10) {
+                                        setPhoneDisabled(true);
+                                      } else {
+                                        setPhoneDisabled(false);
+                                      }
+                                      // Limit to max 11 digits
+                                      cleanedValue = digitsOnly.slice(0, 11);
+                                    } else if (
                                       item.name === "location" ||
                                       item.name === "investmentRange" ||
                                       item.name === "investmentAmountRange" ||
                                       item.name === "investmentHistory" ||
-                                      item.name === "previousRoundRaise" // removed 'website' from here
-                                        ? value.replace(/[^a-zA-Z0-9\s]/g, "") // Removes special characters
-                                        : item.name === "website"
-                                        ? value // Allow all characters for website
-                                        : value.replace(/[^a-zA-Z\s]/g, ""); // Letters and spaces only
+                                      item.name === "previousRoundRaise"
+                                    ) {
+                                      cleanedValue = value.replace(
+                                        /[^a-zA-Z0-9\s]/g,
+                                        ""
+                                      ); // Alphanumeric and spaces
+                                    } else if (item.name === "website") {
+                                      cleanedValue = value; // Allow all characters
+                                    } else {
+                                      cleanedValue = value.replace(
+                                        /[^a-zA-Z\s]/g,
+                                        ""
+                                      ); // Letters and spaces only
+                                    }
 
                                     handleChange({
                                       target: {
@@ -1175,8 +1212,7 @@ const UserForm = ({
                             disabled={
                               !(
                                 localStorage.getItem("authID") &&
-                                role !== "Admin" &&
-                                phone
+                                role !== "Admin"
                               )
                             }
                             variant="contained"
